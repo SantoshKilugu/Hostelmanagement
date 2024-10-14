@@ -1,0 +1,78 @@
+/* Navbar.css */
+.navbar {
+    background-color: #E0F0FF; /* Light blue background */
+    display: flex;
+    justify-content: space-between; /* Space between items */
+    align-items: center;
+    padding: 10px 30px; /* Adjust padding as needed */
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+  }
+  
+  .navbar ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    flex-grow: 1; /* Allow the ul to take the available space */
+  }
+  
+  .navbar ul li {
+    flex: 1; /* Allow each list item to grow equally */
+    text-align: center; /* Center align text in each item */
+  }
+  
+  .navbar ul li a {
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    display: block; /* Make the anchor a block to fill the list item */
+    padding: 10px; /* Add padding for click area */
+  }
+  
+  .navbar ul li a:hover {
+    color: #007BFF; /* Blue text on hover */
+  }
+  
+  /* Dropdown */
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #E0F0FF;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 5px;
+  }
+  
+  .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .dropdown-content a:hover {
+    background-color: #ddd;
+  }
+  
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+  
+  .login-section {
+    margin-right: 20px;
+  }
+  
+  .login-section a {
+    text-decoration: none;
+    color: white;
+    background-color: #343a40;
+    padding: 8px 16px;
+    border-radius: 5px;
+  }
+  
+  .login-section a:hover {
+    background-color: #007BFF;
+  }
+  
