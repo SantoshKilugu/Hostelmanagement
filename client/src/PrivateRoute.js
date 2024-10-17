@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import Cookies from 'js-cookie'; // Import js-cookie
 
 const PrivateRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -7,7 +8,7 @@ const PrivateRoute = ({ children }) => {
 
   useEffect(() => {
     const verifyToken = async () => {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token'); // Get the token from cookies
 
       if (!token) {
         setIsAuthenticated(false);
@@ -20,7 +21,7 @@ const PrivateRoute = ({ children }) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': token  // Attach token to request
+            'Authorization': token // Attach token to request
           }
         });
 
@@ -28,7 +29,7 @@ const PrivateRoute = ({ children }) => {
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
-          localStorage.removeItem('token');  // Remove invalid token
+          Cookies.remove('token'); // Remove invalid token from cookies
         }
       } catch (error) {
         console.error('Error verifying token:', error);
@@ -42,7 +43,7 @@ const PrivateRoute = ({ children }) => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;  // Optionally display a loader
+    return <div>Loading...</div>; // Optionally display a loader
   }
 
   if (!isAuthenticated) {

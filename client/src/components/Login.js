@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import Cookies from 'js-cookie'; // Import js-cookie
 import logo from '../assets/logo.jpg';
-import backgroundImage from '../assets/background.jpg'; // Ensure this path is correct
+import backgroundImage from '../assets/background.jpg';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -23,8 +24,8 @@ const Login = () => {
       const result = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', result.token);
-        // alert('Login successful!');
+        // Store the token in cookies
+        Cookies.set('token', result.token, { expires: 1/24 }); // Set token cookie to expire in 1 hour 
         window.location.href = '/';
       } else {
         console.error('Login error:', result);
@@ -39,21 +40,19 @@ const Login = () => {
   return (
     <div className="relative flex items-center justify-center h-screen bg-gray-900">
       <img
-        src={backgroundImage} // This should point to your image file
+        src={backgroundImage}
         alt="Background"
         className="absolute inset-0 object-cover w-full h-full"
       />
-      <div className="absolute inset-0 bg-black opacity-50"></div> {/* Overlay for transparency */}
-
-      {/* Updated container for transparency and border radius */}
+      <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative z-10 w-full max-w-md p-8 space-y-4 bg-black bg-opacity-40 rounded-lg shadow-md">
-        <div className="flex justify-center mb-4"> {/* Center the logo */}
+        <div className="flex justify-center mb-4">
           <img className="w-22 h-10" src={logo} alt="logo" />
         </div>
         <h1 className="text-xl font-bold text-center text-white">Login</h1>
         <form className="space-y-4" onSubmit={handleLogin}>
           <div>
-            <label htmlFor="username" className="block mb-2 text-sm  font-bold text-white">
+            <label htmlFor="username" className="block mb-2 text-sm font-bold text-white">
               Admin Name
             </label>
             <input
@@ -84,7 +83,7 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="w-full text-white  font-bold bg-gray-900 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg text-sm px-5 py-2.5 text-center"
+            className="w-full text-white font-bold bg-gray-900 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg text-sm px-5 py-2.5 text-center"
           >
             Submit
           </button>

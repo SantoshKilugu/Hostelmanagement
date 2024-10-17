@@ -5,8 +5,8 @@ import mysql from 'mysql2/promise'; // Import MySQL library
 const dbconnect = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  port:'3308',
-  password: 'root',
+  port:'3306',
+  password: 'karna',
   database: 'fingerprint',
   timezone: 'utc',
   dateStrings: true,
