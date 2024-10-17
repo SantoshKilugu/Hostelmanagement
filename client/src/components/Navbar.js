@@ -6,7 +6,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <ul>
-      <li><Link to="/">Registration</Link></li>
+      <li><Link to="/register">Registration</Link></li>
         {/* <li><Link to="/Pass">CheckOut</Link></li> */}
      
         <li className="dropdown">

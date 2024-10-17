@@ -157,8 +157,21 @@ function StudentDetails() {
 
             {/* {error && <p style={{ color: 'red' }}>{error}</p>} */}
 
+
+            <div className="mb-4 flex flex-col items-center"> 
+            
+        </div>
             {studentData && (
                 <> 
+                {studentData.imageUrl ? (
+                <img 
+                    src={studentData.imageUrl} 
+                    alt="Student" 
+                    className=" h-48 w-48 object-cover rounded " 
+                />
+            ) : (
+                <span>No image available</span>
+            )}
                    <table className="w-full mt-4 bg-white shadow-md rounded">
   <thead>
     <tr>

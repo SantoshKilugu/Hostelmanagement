@@ -54,7 +54,24 @@ const Registration = () => {
 
             if (data.length > 0) {
                 setUserData(data[0]);
-                alert("Fingerprint addition functionality executed successfully.");
+                alert("Fingerprint added successfully.");
+            } else {
+                alert("No user found.");
+            }
+        } catch (error) {
+            console.error('Error running JAR:', error);
+            // alert('Error occurred while adding fingerprint.');
+        }
+    };
+
+    const handleUpdateFingerprint = async () => {
+        try {
+            const response = await axios.post('http://localhost:3300/run-jar-update');
+            const data = response.data;
+
+            if (data.length > 0) {
+                setUserData(data[0]);
+                alert("Fingerprint updated successfully.");
             } else {
                 alert("No user found.");
             }
@@ -87,9 +104,12 @@ const Registration = () => {
     const handleButtonClick = (buttonName) => {
         setActiveButton(buttonName);
 
-        if (buttonName === 'addFingerprint') {
-            handleAddFingerprint();
-        }
+        // if (buttonName === 'addFingerprint') {
+        //     handleAddFingerprint();
+        // }
+        // if (buttonName === 'updateFingerprint') {
+        //     handleUpdateFingerprint();
+        // }
     };
 
     const handleBack = () => {
@@ -109,9 +129,13 @@ const Registration = () => {
                     <button onClick={() => handleButtonClick('addFingerprint')} className="bg-gray-800 text-white font-semibold py-2  px-4 rounded hover:bg-gray-700 transition duration-200">
                         Add Fingerprint
                     </button>
+                    <button onClick={() => handleButtonClick('updateFingerprint')} className="bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200">
+                        Update Fingerprint
+                    </button>
                     <button onClick={() => handleButtonClick('moreUsers')} className="bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200">
                         More Users
                     </button>
+
                 </div>
             )}
 
@@ -189,6 +213,22 @@ const Registration = () => {
                     </div>
                 </div>
             )}
+
+{activeButton === 'updateFingerprint' && (
+                <div>
+                    {/* Add Fingerprint logic can be placed here or kept in the same handler */}
+                    <div className="button-container">
+                        <button onClick={handleUpdateFingerprint} className="bg-gray-800 text-white font-semibold py-2 mx-auto block px-4 rounded hover:bg-gray-700 transition duration-200"> Fingerprint</button>
+                    </div>
+
+                    {/* Back button for Add Fingerprint */}
+                    <div className="button-container">
+                        <button onClick={handleBack} className="bg-gray-800 text-white font-semibold py-2 mx-auto block px-4 rounded hover:bg-gray-700 transition duration-200">Back</button>
+                    </div>
+                </div>
+            )}
+
+
         </div>
     );
 };

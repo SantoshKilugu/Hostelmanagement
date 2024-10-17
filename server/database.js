@@ -11,7 +11,7 @@ const dbconnect = mysql.createPool({
   timezone: 'utc',
   dateStrings: true,
   waitForConnections: true,
-  connectionLimit: 200,
+  connectionLimit: 1000,
   queueLimit: 0,
 });
 

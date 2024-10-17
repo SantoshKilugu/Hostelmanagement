@@ -14,7 +14,7 @@ const __dirname = dirname(__filename);
 let reportJob;
 
 // Function to fetch data, create Excel report, and send it via email
-export async function fetchAndEmailData(fromDate, toDate) {
+export async function fetchAndEmailData(fromDate, toDate,filterType) {
     const now = new Date();
     const dateString = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
     const timeString = now.toISOString().split('T')[1].replace(/:/g, '-').split('.')[0]; // Format: HH-MM-SS
@@ -27,9 +27,9 @@ export async function fetchAndEmailData(fromDate, toDate) {
         fs.mkdirSync(folderPath, { recursive: true });
     }
     let query;
-    let params;
-    // SQL query to fetch data from registrations and Gatepass tables
-    if (fromDate && toDate) {
+    let params = [fromDate, toDate,fromDate,toDate];
+
+    if (filterType === 'gatepass') {
         query = `
             SELECT 
                 r.sname,
@@ -48,36 +48,85 @@ export async function fetchAndEmailData(fromDate, toDate) {
             JOIN 
                 Gatepass g ON r.studentId = g.roll_no
             WHERE 
-                DATE(g.date) BETWEEN ? AND ?;
+                DATE(g.outTime) BETWEEN ? AND ? 
+                OR DATE(g.inTime) BETWEEN ? AND ?;  
         `;
-        params = [fromDate, toDate];
+       // Add params for inTime comparison
+       
+    } else if (filterType=== 'outpass') {
+        query = `
+            SELECT 
+                r.sname,
+                r.studentId,
+                r.syear,
+                r.branch,
+                r.hostelblock,
+                r.roomno,
+                r.parentno,
+                o.outTime AS outTime,
+                o.inTime AS inTime,
+                DATE(o.date) AS date,  
+                o.fine
+            FROM 
+                users r
+            JOIN 
+                Outpass o ON r.studentId = o.roll_no
+            WHERE 
+                DATE(o.outTime) BETWEEN ? AND ? 
+                OR DATE(o.inTime) BETWEEN ? AND ?;  
+        `;
+        // Add params for inTime comparison
+       
+    } else if (filterType === 'all') {
+        query = `
+            SELECT 
+                r.sname,
+                r.studentId,
+                r.syear,
+                r.branch,
+                r.hostelblock,
+                r.roomno,
+                r.parentno,
+                g.outTime AS outTime,
+                g.inTime AS inTime,
+                DATE(g.date) AS date,  
+                g.fine
+            FROM 
+                users r
+            JOIN 
+                Gatepass g ON r.studentId = g.roll_no
+            WHERE 
+                DATE(g.outTime) BETWEEN ? AND ? 
+                OR DATE(g.inTime) BETWEEN ? AND ? 
+            UNION ALL
+            SELECT 
+                r.sname,
+                r.studentId,
+                r.syear,
+                r.branch,
+                r.hostelblock,
+                r.roomno,
+                r.parentno,
+                o.outTime AS outTime,
+                o.inTime AS inTime,
+                DATE(o.date) AS date,  
+                o.fine
+            FROM 
+                users r
+            JOIN 
+                Outpass o ON r.studentId = o.roll_no
+            WHERE 
+                DATE(o.outTime) BETWEEN ? AND ? 
+                OR DATE(o.inTime) BETWEEN ? AND ?;  
+        `;
+        params.push(from, to,from,to); // Add params for second query in the UNION
     } else {
-        // Default to today's date
-        query = `
-            SELECT 
-                r.sname,
-                r.studentId,
-                r.syear,
-                r.branch,
-                r.hostelblock,
-                r.roomno,
-                r.parentno,
-                g.outTime AS outTime,
-                g.inTime AS inTime,
-                DATE(g.date) AS date,  
-                g.fine
-            FROM 
-                users r
-            JOIN 
-                Gatepass g ON r.studentId = g.roll_no
-            WHERE 
-                DATE(g.date) = ?;
-        `;
-        params = [dateString];
+        console.log("Invalid report type.");
+        return;
     }
 
-    // Query to fetch data for today
-    const [rows] = await dbconnect.execute(query,params);
+    // Query to fetch data
+    const [rows] = await dbconnect.execute(query, params);
 
     if (rows.length > 0) {
         // Create Excel file
@@ -169,7 +218,7 @@ export function scheduleReportTime(time) {
     // Schedule a new cron job
     reportJob = cron.schedule(time, () => {
         console.log(`Running scheduled report at ${time}`);
-        fetchAndEmailData(null,null);
+        fetchAndEmailData(null,null,null);
     });
 
     console.log(`Report scheduled at ${time}`);

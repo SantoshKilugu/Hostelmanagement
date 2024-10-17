@@ -13,6 +13,7 @@ import Outpass from './components/Outpass';
 import Checkinout from './components/Checkinout';
 import PrivateRoute from './PrivateRoute';
 import Login from './components/Login';
+import Home from './components/Home';
 
 function App() {
   return (
@@ -47,8 +48,20 @@ function App() {
               </PrivateRoute>
             } 
           />
-          <Route 
+           <Route 
             path="/" 
+            element={
+              <PrivateRoute>
+                <div>
+                  <div className="header">Gate Pass Generation</div>
+                  <Navbar />
+                  <Home />
+                </div>
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/register" 
             element={
               <PrivateRoute>
                 <div>

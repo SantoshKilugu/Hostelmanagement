@@ -213,6 +213,48 @@ app.post('/run-jar', async (req, res) => {
     });
 });
 
+
+// Endpoint to run the JAR file to update
+app.post('/run-jar-update', async (req, res) => {
+    // const jarPath = path.join(__dirname, '..', 'Register.jar');
+    const jarPath="Update.jar";
+    exec(`java -jar ${jarPath}`, async (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error: ${stderr}`);
+            return res.status(500).send(stderr);
+        }
+
+        console.log(`Output: ${stdout}`);
+        const lines = stdout.split('\n');
+        const id = lines[0].trim();
+        const getUserDataById = async (id) => {
+            const query = `SELECT * FROM users WHERE studentId = ?`;
+            const values = [id];
+          
+            try {
+              const [rows, fields] = await dbconnect.execute(query, values);
+              return rows;
+            } catch (error) {
+              console.error('Error retrieving user data:', error);
+              return [];
+            }
+          };
+        try {
+            const userData = await getUserDataById(id);
+            if (userData.length > 0) {
+                res.json(userData);
+            } else {
+                res.status(404).send('User not found');
+            }
+        } catch (dbError) {
+            console.error('Database query failed:', dbError);
+            res.status(500).send('Database query failed');
+        }
+    });
+});
+
+
+
 // Endpoint to run the JAR file
 app.post('/run-jar-verify', async (req, res) => {
     // const jarPath = path.join(__dirname, '..', 'Verify.jar');
@@ -316,21 +358,32 @@ app.post('/update-gatepass', async (req, res) => {
             LIMIT 1
         `;
         const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
-    
-        // If there is a previous transaction and inTime is null (incomplete transaction), block the insertion
-        if (rows.length > 0 && rows[0].inTime === null) {
-            res.status(400).send({ message: 'Cannot create new gatepass. The Student has not yet returned' });
-        } else {
-            // Insert a new record into the Gatepass table
-            const insertQuery = `
-                INSERT INTO Gatepass (roll_no, outTime, date)
-                VALUES (?, ?, ?)
-            `;
-            const values = [roll_no, formattedDateTime, formattedDateTime.split(' ')[0]]; // Insert formatted datetime and date
-    
-            await dbconnect.execute(insertQuery, values);
-            res.status(200).send({ message: 'Gatepass updated successfully!' });
-        }
+        const outpassCheckQuery = `
+        SELECT * FROM Outpass
+        WHERE roll_no = ?
+        ORDER BY outpassID DESC
+        LIMIT 1
+    `;
+    const [outpassRows] = await dbconnect.execute(outpassCheckQuery, [roll_no]);
+    const gatepassIncomplete = rows.length > 0 && rows[0].inTime === null;
+    const outpassIncomplete = outpassRows.length > 0 && outpassRows[0].inTime === null;
+
+    // If either the Gatepass or Outpass tables have an incomplete transaction, block the insertion
+    if (gatepassIncomplete || outpassIncomplete) {
+        res.status(400).send({ 
+            message: 'Cannot create new gatepass. The student has not yet returned from a previous outing (either Gatepass or Outpass is incomplete).' 
+        });
+    } else {
+        // Insert a new record into the Gatepass table
+        const insertQuery = `
+            INSERT INTO Gatepass (roll_no, outTime, date)
+            VALUES (?, ?, ?)
+        `;
+        const values = [roll_no, formattedDateTime, formattedDateTime.split(' ')[0]]; // Insert formatted datetime and date
+
+        await dbconnect.execute(insertQuery, values);
+        res.status(200).send({ message: 'Gatepass updated successfully!' });
+    }
     } catch (error) {
         console.error('Error updating Gatepass:', error);
         res.status(500).send({ error: 'Failed to update Gatepass.' });
@@ -359,20 +412,35 @@ app.post('/update-outpass', async (req, res) => {
     console.log("Formatted DateTime:", formattedDateTime); // To verify the format
 
     try {
-        // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction)
-        const checkQuery = `
+        // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction) in the Outpass table
+        const outpassCheckQuery = `
             SELECT * FROM Outpass
             WHERE roll_no = ?
             ORDER BY outpassID DESC
             LIMIT 1
         `;
-        const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+        const [outpassRows] = await dbconnect.execute(outpassCheckQuery, [roll_no]);
     
-        // If there is a previous transaction and inTime is null (incomplete transaction), block the insertion
-        if (rows.length > 0 && rows[0].inTime === null) {
-            res.status(400).send({ message: 'Cannot create new outpass. The Student has not yet returned' });
+        // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction) in the Gatepass table
+        const gatepassCheckQuery = `
+            SELECT * FROM Gatepass
+            WHERE roll_no = ?
+            ORDER BY gatepassID DESC
+            LIMIT 1
+        `;
+        const [gatepassRows] = await dbconnect.execute(gatepassCheckQuery, [roll_no]);
+
+        // Check for incomplete transactions in both Outpass and Gatepass tables
+        const outpassIncomplete = outpassRows.length > 0 && outpassRows[0].inTime === null;
+        const gatepassIncomplete = gatepassRows.length > 0 && gatepassRows[0].inTime === null;
+
+        // If either the Outpass or Gatepass tables have an incomplete transaction, block the insertion
+        if (outpassIncomplete || gatepassIncomplete) {
+            res.status(400).send({ 
+                message: 'Cannot create new outpass. The student has not yet returned from a previous outing (either Gatepass or Outpass is incomplete).' 
+            });
         } else {
-            // Insert a new record into the Gatepass table
+            // Insert a new record into the Outpass table
             const insertQuery = `
                 INSERT INTO Outpass (roll_no, outTime, date)
                 VALUES (?, ?, ?)
@@ -387,7 +455,6 @@ app.post('/update-outpass', async (req, res) => {
         res.status(500).send({ error: 'Failed to update outpass.' });
     }
 });
-
 
 
 // Endpoint to upload an Excel file
@@ -447,17 +514,21 @@ app.get('/get-student-details/:roll_no', async (req, res) => {
                     g.roll_no = ?
             `;
             const outpassQuery = `
-            SELECT 
-                g.date,
-                g.outTime,
-                g.inTime
-            FROM 
-                Outpass g
-            WHERE 
-                g.roll_no = ?
-        `;
+                SELECT 
+                    g.date,
+                    g.outTime,
+                    g.inTime
+                FROM 
+                    Outpass g
+                WHERE 
+                    g.roll_no = ?
+            `;
             const [outpassRows] = await dbconnect.execute(outpassQuery, [rollNo]);
             const [gatepassRows] = await dbconnect.execute(gatepassQuery, [rollNo]);
+
+            // Fetch the image URL associated with the student
+            const imageQuery = `SELECT imageUrl FROM images WHERE studentId = ?`;
+            const [imageRows] = await dbconnect.execute(imageQuery, [rollNo]);
 
             // Get the current year and month
             const now = new Date();
@@ -473,22 +544,23 @@ app.get('/get-student-details/:roll_no', async (req, res) => {
                   AND MONTH(date) = ?
             `;
             const countoutQuery = `
-            SELECT COUNT(*) as count 
-            FROM Outpass 
-            WHERE roll_no = ? 
-              AND YEAR(date) = ? 
-              AND MONTH(date) = ?
-        `;
+                SELECT COUNT(*) as count 
+                FROM Outpass 
+                WHERE roll_no = ? 
+                  AND YEAR(date) = ? 
+                  AND MONTH(date) = ?
+            `;
             const [countRows] = await dbconnect.execute(countQuery, [rollNo, currentYear, currentMonth]);
             const [countoutRows] = await dbconnect.execute(countoutQuery, [rollNo, currentYear, currentMonth]);
 
-          
+            // Prepare student data
             const studentData = {
                 ...studentRows[0], // Student details
                 gatepasses: gatepassRows,
-                outpasses:outpassRows,
+                outpasses: outpassRows,
                 gatepassCount: countRows[0].count, // Gatepass count for the current month
-                outpassCount:countoutRows[0].count
+                outpassCount: countoutRows[0].count, // Outpass count for the current month
+                imageUrl: imageRows.length > 0 ? imageRows[0].imageUrl : null // Fetching the image URL, if available
             };
 
             res.json(studentData);
@@ -520,13 +592,36 @@ app.get('/current-gatepass-report', async (req, res) => {
         g.outTime AS outTime,
         g.inTime AS inTime,
         DATE(g.date) AS date,  
-        g.fine
+        g.fine,
+        'Gatepass' AS type
     FROM 
         users r
     JOIN 
         Gatepass g ON r.studentId = g.roll_no
     WHERE 
-        (DATE(g.outTime) = CURDATE() OR DATE(g.inTime) = CURDATE());  
+        (DATE(g.outTime) = CURDATE() OR DATE(g.inTime) = CURDATE())
+
+    UNION ALL
+
+    SELECT 
+        r.sname,
+        r.studentId,
+        r.syear,
+        r.branch,
+        r.hostelblock,
+        r.roomno,
+        r.parentno,
+        o.outTime AS outTime,
+        o.inTime AS inTime,
+        DATE(o.date) AS date,  
+        o.fine,
+        'Outpass' AS type
+    FROM 
+        users r
+    JOIN 
+        Outpass o ON r.studentId = o.roll_no
+    WHERE 
+        (DATE(o.outTime) = CURDATE() OR DATE(o.inTime) = CURDATE());
     `;
 
     try {
@@ -537,32 +632,110 @@ app.get('/current-gatepass-report', async (req, res) => {
         res.status(500).send({ error: 'Failed to fetch current gatepass report' });
     }
 });
+
 ///filtered report
 app.get('/current-gatepass-report-filtered', async (req, res) => {
-    const { from, to } = req.query; 
-    const query = `
-    SELECT 
-        r.sname,
-        r.studentId,
-        r.syear,
-        r.branch,
-        r.hostelblock,
-        r.roomno,
-        r.parentno,
-        g.outTime AS outTime,
-        g.inTime AS inTime,
-        DATE(g.date) AS date,  
-        g.fine
-    FROM 
-        users r
-    JOIN 
-        Gatepass g ON r.studentId = g.roll_no
-    WHERE 
-        DATE(g.date) BETWEEN ? AND ?;  
-    `;
+    const { from, to, type } = req.query; // Get the type from the query
+    let query;
+    let params = [from, to,from,to];
+
+    if (type === 'gatepass') {
+        query = `
+            SELECT 
+                r.sname,
+                r.studentId,
+                r.syear,
+                r.branch,
+                r.hostelblock,
+                r.roomno,
+                r.parentno,
+                g.outTime AS outTime,
+                g.inTime AS inTime,
+                DATE(g.date) AS date,  
+                g.fine
+            FROM 
+                users r
+            JOIN 
+                Gatepass g ON r.studentId = g.roll_no
+            WHERE 
+                DATE(g.outTime) BETWEEN ? AND ? 
+                OR DATE(g.inTime) BETWEEN ? AND ?;  
+        `;
+       // Add params for inTime comparison
+       
+    } else if (type === 'outpass') {
+        query = `
+            SELECT 
+                r.sname,
+                r.studentId,
+                r.syear,
+                r.branch,
+                r.hostelblock,
+                r.roomno,
+                r.parentno,
+                o.outTime AS outTime,
+                o.inTime AS inTime,
+                DATE(o.date) AS date,  
+                o.fine
+            FROM 
+                users r
+            JOIN 
+                Outpass o ON r.studentId = o.roll_no
+            WHERE 
+                DATE(o.outTime) BETWEEN ? AND ? 
+                OR DATE(o.inTime) BETWEEN ? AND ?;  
+        `;
+        // Add params for inTime comparison
+       
+    } else if (type === 'all') {
+        query = `
+            SELECT 
+                r.sname,
+                r.studentId,
+                r.syear,
+                r.branch,
+                r.hostelblock,
+                r.roomno,
+                r.parentno,
+                g.outTime AS outTime,
+                g.inTime AS inTime,
+                DATE(g.date) AS date,  
+                g.fine
+            FROM 
+                users r
+            JOIN 
+                Gatepass g ON r.studentId = g.roll_no
+            WHERE 
+                DATE(g.outTime) BETWEEN ? AND ? 
+                OR DATE(g.inTime) BETWEEN ? AND ? 
+            UNION ALL
+            SELECT 
+                r.sname,
+                r.studentId,
+                r.syear,
+                r.branch,
+                r.hostelblock,
+                r.roomno,
+                r.parentno,
+                o.outTime AS outTime,
+                o.inTime AS inTime,
+                DATE(o.date) AS date,  
+                o.fine
+            FROM 
+                users r
+            JOIN 
+                Outpass o ON r.studentId = o.roll_no
+            WHERE 
+                DATE(o.outTime) BETWEEN ? AND ? 
+                OR DATE(o.inTime) BETWEEN ? AND ?;  
+        `;
+        params.push(from, to,from,to); // Add params for second query in the UNION
+    } else {
+        return res.status(400).send({ error: 'Invalid report type' });
+    }
 
     try {
-        const [rows] = await dbconnect.execute(query, [from, to]); // Pass the dates as parameters
+        const [rows] = await dbconnect.execute(query, params);
         res.json(rows);
     } catch (error) {
         console.error('Error fetching current gatepass report:', error);
@@ -572,9 +745,9 @@ app.get('/current-gatepass-report-filtered', async (req, res) => {
 
 
 app.post('/send-report', async (req, res) => {
-    const { fromDate, toDate } = req.body;
+    const { fromDate, toDate,filterType } = req.body;
     try {
-        await fetchAndEmailData(fromDate, toDate);
+        await fetchAndEmailData(fromDate, toDate,filterType);
         res.status(200).send('Report sent successfully.');
     } catch (error) {
         console.error('Error sending report:', error);
