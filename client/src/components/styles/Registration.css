@@ -1,18 +1,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap'); /* Import a custom font */
 
 body {
-    font-family: 'Roboto', sans-serif; /* Set the font for the body */
+    font-family: 'Roboto', sans-serif; 
+   /* Cover the entire viewport */
+   
+    /* Set the font for the body */
+}
+.background {
+    position: fixed; /* Fix background image */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://gmrit.edu.in/images/blocks/Landing.png'); /* Replace with your image URL */
+    
+    background-size: cover; /* Cover the entire background */
+    background-position: center; /* Center the background image */
+    filter: brightness(0.5); /* Darken the image */
+    z-index: 0; /* Ensure it's behind the content */
 }
 
 .registration-container {
     max-width: 650px;
     margin: 50px auto;
     padding: 20px;
+    
+        
+        z-index: 1; /* Ensure content appears above the background */
+       /* Optional: Add some padding */
+    
     background-color: #E0F0FF; /* Light blue background */
     /* border-radius: 10px; */
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); /* Enhanced box shadow */
 }
-
+.error-message {
+    color: red;
+    font-size: 0.875rem; /* Slightly smaller than regular text */
+    margin-top: 0.25rem; /* Some space between the input and the message */
+}
 h2 {
     text-align: center;
     margin-bottom: 20px; /* Add some margin for spacing */
@@ -29,7 +54,9 @@ h2 {
     justify-content: space-between; /* Space between label and input */
     align-items: center; /* Align items vertically in the center */
 }
-
+.parent{
+    width: 355px;
+}
 label {
     flex: 0 0 40%; /* Fixed width for labels */
     margin-right: 10px; /* Space between label and input */
@@ -41,7 +68,7 @@ input {
     flex: 1; /* Take the remaining space */
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 8px; /* Added border radius for input boxes */
+
     transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for effects */
 }
 

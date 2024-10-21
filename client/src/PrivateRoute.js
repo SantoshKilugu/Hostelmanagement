@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie'; // Import js-cookie
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, setUsername }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-
+ 
   useEffect(() => {
     const verifyToken = async () => {
       const token = Cookies.get('token'); // Get the token from cookies
@@ -26,7 +26,9 @@ const PrivateRoute = ({ children }) => {
         });
 
         if (response.ok) {
+          const data = await response.json();
           setIsAuthenticated(true);
+          setUsername(data.username);
         } else {
           setIsAuthenticated(false);
           Cookies.remove('token'); // Remove invalid token from cookies
@@ -40,7 +42,7 @@ const PrivateRoute = ({ children }) => {
     };
 
     verifyToken();
-  }, []);
+  }, [setUsername]);
 
   if (loading) {
     return <div>Loading...</div>; // Optionally display a loader

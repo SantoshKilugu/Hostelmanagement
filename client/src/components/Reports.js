@@ -111,7 +111,7 @@ function Reports() {
 
     return (
         <div>
-            <h1 className="text-center font-bold text-gray-800 mb-4 mt-4">Current Report</h1>
+            <h1 className="text-center font-bold text-white text-gray-800 mb-4 mt-4">Current Report</h1>
             <div className="flex justify-center mb-4 ml-56 mr-56">
                 <input
                     type="date"
@@ -150,7 +150,7 @@ function Reports() {
             {loading ? (
                 <p>Loading...</p>
             ) : (
-                <table >
+                <table className='bg-black text-white bg-opacity-5'>
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -189,35 +189,36 @@ function Reports() {
                 <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(currentPage - 1)}
-                    className={`text-dark font-bold py-2 px-3 rounded shadow-md hover:bg-gray-300 transition duration-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`text-white font-bold py-2 px-3 rounded shadow-md  transition duration-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <FontAwesomeIcon icon={faArrowLeft} />
                 </button>
-                <span>Page {currentPage} of {totalPages}</span>
+                <span className='text-white'>Page {currentPage} of {totalPages}</span>
                 <button
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    className={`font-bold py-2 px-3 rounded shadow-md hover:bg-gray-300 transition duration-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`text-white font-bold py-2 px-3 rounded shadow-md  transition duration-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <FontAwesomeIcon icon={faArrowRight} />
                 </button>
             </div>
             <div className="flex items-center justify-between mt-4">
-                <button className="bg-gray-800 text-white ml-3 font-bold py-2 px-4 rounded shadow-md hover:bg-gray-600 transition duration-200" onClick={handleDownload}>
+                <button className="bg-gray-900 text-white  ml-3 font-bold py-2 px-4 rounded shadow-md hover:bg-gray-600 transition duration-200" onClick={handleDownload}>
                     Download Current Report
                 </button>
                 <div className="flex items-center">
                     <input
-                        type="time"
+                        type="time" 
                         value={reportTime}
                         onChange={(e) => setReportTime(e.target.value)}
-                        className="mr-2 w-30 bg-transparent outline-none"
+                        className="mr-2 w-30 bg-transparent outline-none text-white"
                     />
                     <button className="bg-gray-800 text-white font-bold py-2 px-4 mr-3 rounded shadow-md hover:bg-gray-600 transition duration-200" onClick={handleSaveTime}>
                         Save time to send report
                     </button>
                 </div>
             </div>
+            <br></br>
         </div>
     );
 }

@@ -2,11 +2,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 body {
-    font-family: 'Roboto', sans-serif; /* Set the font for the body */
+    font-family: 'Roboto', sans-serif; 
+    
 }
 
 h1, p {
-    font-family: 'Arial', sans-serif; /* Font for heading and paragraph */
+    font-family: 'Arial', sans-serif; 
+    color: whitesmoke;/* Font for heading and paragraph */
 }
 
 .button-container1 {

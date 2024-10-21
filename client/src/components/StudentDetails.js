@@ -142,6 +142,7 @@ function StudentDetails() {
     return (
         <div className="form-container">
             <div className="form-grid1">
+                
                 <label htmlFor="rollNo">Enter Register ID:</label>
                 <input
                     type="text"
@@ -152,7 +153,7 @@ function StudentDetails() {
                 />
             </div>
             <div className="button-container1">
-                <button className="bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200" onClick={fetchStudentDetails}>Get Details</button>
+                <button className="bg-gray-800 text-white font-semibold py-2 px-4 shadow-sm rounded hover:bg-gray-700 transition duration-200" onClick={fetchStudentDetails}>Get Details</button>
             </div>
 
             {/* {error && <p style={{ color: 'red' }}>{error}</p>} */}
@@ -161,75 +162,33 @@ function StudentDetails() {
             <div className="mb-4 flex flex-col items-center"> 
             
         </div>
-            {studentData && (
-                <> 
-                {studentData.imageUrl ? (
-                <img 
-                    src={studentData.imageUrl} 
-                    alt="Student" 
-                    className=" h-48 w-48 object-cover rounded " 
-                />
-            ) : (
-                <span>No image available</span>
-            )}
-                   <table className="w-full mt-4 bg-white shadow-md rounded">
-  <thead>
-    <tr>
-      <th className="px-4 py-2 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Column</th>
-      <th className="px-4 py-2 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Details</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr className="hover:bg-gray-100">
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">
-        <strong>Name:</strong>
-      </td>
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">{studentData.sname}</td>
-    </tr>
-    <tr className="hover:bg-gray-100">
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">
-        <strong>Roll No:</strong>
-      </td>
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">{studentData.studentId}</td>
-    </tr>
-    <tr className="hover:bg-gray-100">
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">
-        <strong>Branch:</strong>
-      </td>
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">{studentData.branch}</td>
-    </tr>
-    <tr className="hover:bg-gray-100">
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">
-        <strong>Year:</strong>
-      </td>
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">{studentData.syear}</td>
-    </tr>
-    <tr className="hover:bg-gray-100">
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">
-        <strong>Parent Phone:</strong>
-      </td>
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">{studentData.parentno}</td>
-    </tr>
-    <tr className="hover:bg-gray-100">
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">
-        <strong>Hostel Name:</strong>
-      </td>
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">{studentData.hostelblock}</td>
-    </tr>
-    <tr className="hover:bg-gray-100">
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">
-        <strong>Room No:</strong>
-      </td>
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">{studentData.roomno}</td>
-    </tr>
-    <tr className="hover:bg-gray-100">
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">
-        <strong>Gatepass Count:</strong>
-      </td>
-      <td className="px-4 py-2 whitespace-no-wrap border-b border-gray-200">{studentData.gatepassCount}</td>
-    </tr>
-  </tbody>
-</table>
+        {studentData && (
+                <>
+                    {/* Student Details Box */}
+                    <div className=" student   flex items-center bg-white  p-6 rounded-lg">
+                        {/* Image Section */}
+                        {studentData.imageUrl ? (
+                            <img 
+                                src={studentData.imageUrl} 
+                                alt="Student" 
+                                className="h-32 w-32 object-cover rounded mr-6" 
+                            />
+                        ) : (
+                            <span>No image available</span>
+                        )}
+                        {/* Details Section */}
+                        <div className="grid grid-cols-3 gap-x-8 gap-y-4">
+                            <div><strong>Name:</strong> {studentData.sname}</div>
+                            <div><strong>Roll No:</strong> {studentData.studentId}</div>
+                            <div><strong>Branch:</strong> {studentData.branch}</div>
+                            <div><strong>Year:</strong> {studentData.syear}</div>
+                           
+                            <div><strong>Hostel Name:</strong> {studentData.hostelblock}</div>
+                            <div><strong>Room No:</strong> {studentData.roomno}</div>
+                            <div><strong>Gatepass Count:</strong> {studentData.gatepassCount}</div>
+                            <div><strong>Parent No:</strong> {studentData.parentno}</div>
+                        </div>
+                    </div>
                   
                     <div className="mt-5">
                     <hr className="border-t-2 border-gray-400 my-4" />

@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 import XLSX from 'xlsx'; // Import xlsx library
 import { fetchAndEmailData } from './Report.js'; 
 import cron from 'node-cron'; // Import node-cron for scheduling tasks
-
+import axios from 'axios';
 import ExcelJS from 'exceljs';
 import { scheduleReportTime } from './Report.js'; // Adjust the path if necessary
 import jwt from 'jsonwebtoken';
@@ -26,7 +26,8 @@ const JWT_SECRET = 'bala222333';
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000'  // Your frontend URL
+    origin: 'http://localhost:3000',  // Your frontend URL
+    credentials: true,
 }));
 app.use(bodyParser.json());
 
@@ -65,7 +66,53 @@ app.post('/register', async (req, res) => {
         res.status(500).send({ error: 'Failed to insert registration details.' });
     }
 });
-
+// Endpoint to verify roll number and get user data
+app.get('/verify-rollupdate/:roll_no', async (req, res) => {
+    const rollNo = req.params.roll_no;
+  
+    try {
+      const query = 'SELECT * FROM users WHERE studentId = ?';
+      const [rows] = await dbconnect.execute(query, [rollNo]);
+  
+      if (rows.length > 0) {
+        res.json(rows); // Send user data as response
+      } else {
+        res.status(404).json({ message: 'No user found with that roll number.' });
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      res.status(500).json({ message: 'Internal server error.' });
+    }
+  });
+  
+  // Endpoint to update user data
+  app.put('/update-user', async (req, res) => {
+    const { name, roll_no, year, branch, hostel_block_name, room_no, parent_no } = req.body;
+  
+    try {
+      const query = `
+        UPDATE users SET 
+          sname = ?, 
+          syear = ?, 
+          branch = ?, 
+          hostelblock = ?, 
+          roomno = ?, 
+          parentno = ? 
+        WHERE studentId = ?
+      `;
+      const [result] = await dbconnect.execute(query, [name, year, branch, hostel_block_name, room_no, parent_no, roll_no]);
+  
+      if (result.affectedRows > 0) {
+        res.json({ message: 'User updated successfully.' });
+      } else {
+        res.status(404).json({ message: 'No user found to update.' });
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      res.status(500).json({ message: 'Internal server error.' });
+    }
+  });
+  
 
 
 // Endpoint to verify roll number and get user data
@@ -120,6 +167,9 @@ app.get('/verify-roll/:roll_no', async (req, res) => {
         res.status(500).send({ error: 'Failed to fetch user data' });
     }
 });
+
+
+
 
 app.get('/verify-roll-outpass/:roll_no', async (req, res) => {
     const rollNo = req.params.roll_no;
@@ -314,7 +364,6 @@ app.post('/run-jar-verify', async (req, res) => {
                     gatepasses: gatepassRows,
                     gatepassCount: countRows[0].count
                 };
-
                 res.json(studentData);
             } else {
                 res.status(404).send('User not found');
@@ -325,7 +374,41 @@ app.post('/run-jar-verify', async (req, res) => {
         }
     });
 });
+const username = 'GMRInstitute';  // Your SMS Striker username
+const password = '778465';       // Your SMS Striker password
+const from = 'GMRITe';     // Replace with your sender ID
+const to = '+917993675966';  // Ensure the number is formatted correctly, e.g. with country code if needed
+const id = '1407166599141887662';  // Ensure this template ID is correct and matches the message content
+const p1='Dear Parent, Pink Pass issued for your ward at';
+const p3 = 'and will be reaching home';
+app.post('/send-sms', async (req, res) => {
+    const { message } = req.body;
+    
+    // Ensure the message is URL encoded to handle any special characters
+    const encodedMessage = encodeURIComponent(message);
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString();
+    const p =`${p1}+${formattedDate}+${p3}`;
+    // Construct the API URL
+    const smsApiUrl = `https://www.smsstriker.com/API/sms.php?username=${username}&password=${password}&from=${from}&to=${message}&msg=${p}&type=1&template_id=${id}`;
 
+    try {
+        // Make the API request
+        const response = await axios.get(smsApiUrl);
+        
+        // Log the full response for debugging purposes
+        console.log('SMS API Response:', response.data);
+        
+        // Send a successful response to the client
+        res.status(200).json({ success: true, data: response.data });
+    } catch (error) {
+        // Log the error details for troubleshooting
+        console.error('Error sending SMS:', error.response ? error.response.data : error.message);
+
+        // Send a failure response to the client
+        res.status(500).json({ success: false, message: 'Error sending SMS', error: error.response ? error.response.data : error.message });
+    }
+});
 
 
 // Endpoint to update the Gatepass table
@@ -477,10 +560,10 @@ app.post('/upload-excel', upload.single('excelFile'), async (req, res) => {
 
         // Insert data into the database
         for (const row of data) {
-            const { roll_no,name,  year, branch, hostel_block_name, room_no, parent_no } = row;
+            const { roll_no,name,  year, branch, hostel_block_name, room_no, parent_no,imageUrl } = row;
 
-            const query = `INSERT INTO users (studentId,sname, syear, branch, hostelblock,  roomno,parentno) VALUES (?, ?, ?, ?, ?, ?, ?) `;
-            const values = [roll_no,name,  year, branch, hostel_block_name, room_no, parent_no || null];
+            const query = `INSERT INTO users (studentId,sname, syear, branch, hostelblock,  roomno,parentno,imageUrl) VALUES (?, ?, ?, ?, ?, ?, ?,?) `;
+            const values = [roll_no,name,  year, branch, hostel_block_name, room_no, parent_no,imageUrl || null];
 
             await dbconnect.execute(query, values);
         }
@@ -491,6 +574,44 @@ app.post('/upload-excel', upload.single('excelFile'), async (req, res) => {
         res.status(500).send({ message: 'Failed to process Excel file.' });
     }
 });
+
+
+
+
+app.post('/upload-images-excel', upload.single('imageExcelFile'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send({ message: 'No file uploaded.' });
+    }
+
+    const filePath = req.file.path; // Get the uploaded file path
+    console.log('Excel file with images uploaded:', filePath);
+
+    try {
+        // Read the Excel file
+        const workbook = XLSX.readFile(filePath);
+        const sheetName = workbook.SheetNames[0]; // Get the first sheet
+        const worksheet = workbook.Sheets[sheetName];
+
+        // Convert the sheet to JSON
+        const data = XLSX.utils.sheet_to_json(worksheet);
+
+        // Insert data into the database
+        for (const row of data) {
+            const { studentId, imageUrl } = row; // Ensure these column names match your Excel file
+
+            const query = `UPDATE users SET imageUrl = ? WHERE studentId = ?`;
+            const values = [imageUrl, studentId];
+
+            await dbconnect.execute(query, values);
+        }
+
+        res.status(200).send({ message: 'Image data inserted successfully.' });
+    } catch (error) {
+        console.error('Error processing image Excel file:', error);
+        res.status(500).send({ message: 'Failed to process image Excel file.' });
+    }
+});
+
 
 
 app.get('/get-student-details/:roll_no', async (req, res) => {
@@ -1110,6 +1231,7 @@ app.post('/login', async (req, res) => {
 
     // Default credentials
     const defaultUsername = 'admin';
+    const df2='guard';
     const defaultPassword = 'admin';
 
     if (!username || !password) {
@@ -1117,7 +1239,7 @@ app.post('/login', async (req, res) => {
     }
 
     // Check for default credentials
-    if (username === defaultUsername && password === defaultPassword) {
+    if (( username === defaultUsername   ) && password === defaultPassword) {
         const token = jwt.sign(
             { username: defaultUsername },
             JWT_SECRET,
@@ -1125,6 +1247,15 @@ app.post('/login', async (req, res) => {
         );
         return res.json({ message: 'Login successful', token });
     }
+    if ( username === df2   && password === defaultPassword) {
+        const token = jwt.sign(
+            { username: df2 },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        return res.json({ message: 'Login successful', token });
+    }
+   
 
     // If the username and password do not match the default, return 401
     return res.status(401).json({ message: 'Invalid username or password' });
@@ -1153,7 +1284,13 @@ app.get('/protected', authenticateToken, (req, res) => {
 
 
 app.post('/verify-token', authenticateToken, (req, res) => {
-    res.status(200).json({ message: 'Token is valid' });
+    res.status(200).json({ message: 'Token is valid' ,username: req.user.username});
+});
+
+
+app.post('/logout', (req, res) => {
+    res.clearCookie('token'); // Clear the token cookie
+    res.status(200).json({ message: 'Logout successful' });
 });
 
 
