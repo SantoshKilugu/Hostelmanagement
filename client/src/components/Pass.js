@@ -8,13 +8,15 @@ const Pass = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState('');
   const [error1, setError1] = useState('');
-
+ 
+ 
   const [fingerprintData, setFingerprintData] = useState(null);
 
   // Function to verify and fetch full data for Pink Pass
   const handleVerifyPinkPass = async () => {
     setFingerprintData(null);
     setError1(null);
+    setError(null)
     if (rollNo.trim() === '') {
       setError('Please enter a valid Roll Number.');
       return;
@@ -25,6 +27,7 @@ const Pass = () => {
       if (response.ok) {
         const data = await response.json();
         setUserData(data);
+        
         setError(''); // Clear error
 
         // After fetching user data, update the gatepass table
@@ -43,32 +46,6 @@ const Pass = () => {
       setUserData(null);
     }
   };
-
-  // Function to update gate pass with current date and time
-  const updateGatepass = async (rollNo, parentWhatsAppNumber) => {
-    try {
-      const response = await fetch(`http://localhost:3300/update-gatepass`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ roll_no: rollNo }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        setError(data.message);
-        console.error('Error updating gate pass:', data.message);
-      } else {
-        console.log('Gate pass updated successfully.');
-  
-        // Send a WhatsApp message to the parent
-        // await sendWhatsAppMessage(parentWhatsAppNumber, 'The MSG SENT successfully.');
-      }
-    } catch (err) {
-      console.error('Error:', err);
-    }
-  };
   const sendSMS = async ( message) => {
     try {
         const response = await axios.post('http://localhost:3300/send-sms-pink', {
@@ -84,107 +61,39 @@ const Pass = () => {
         console.error('Error sending SMS:', error);
     }
 };
-  
-  // Function to generate Pink Pass PDF
-  const generatePinkPassPDF = () => {
-    if (userData) {
-      // updateGatepass(userData.studentId,userData.parentno);
-
-      const doc = new jsPDF();
-      doc.setFontSize(10);
-      doc.setFontSize(16);
-      doc.text('GMR VARALAKSHMI FOUNDATION', 60, 20);
-      doc.setFontSize(12);
-      doc.text('REQUISITION FOR PERMISSION TO LEAVE THE HOSTEL', 50, 28);
-      doc.text('GMR Nagar, RAJAM-532 127', 80, 36);
-      doc.text('No: ', 160, 36); // Template No field (blank)
-      doc.rect(15, 10, 180, 30);
-
-      // Student Information Section
-      doc.setFontSize(10);
-      doc.text('1. Name of the Student:', 20, 50);
-      doc.text(userData.sname || '', 70, 50);
-      doc.text('2. JNTU Registration No:', 20, 60);
-      doc.text(userData.studentId || '', 70, 60);
-      doc.text('3. Branch & Year of Study:', 20, 70);
-      doc.text(`${userData.branch} & ${userData.syear}` || '', 70, 70);
-      doc.text('4. Name of the Hostel:', 20, 80);
-      doc.text(userData.hostelblock || '', 70, 80);
+  // Function to update gate pass with current date and time
+  const updateGatepass = async (rollNo,parentno) => {
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:3300/update-gatepass`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ roll_no: rollNo }),
+      });
       
-     
-      doc.text('5. Room No:', 20, 90);
-      doc.text(userData.roomno || '', 70, 90);
-      const currentDate = new Date();
-      const formattedDate = currentDate.toLocaleDateString(); // Formats date as MM/DD/YYYY
-      const formattedTime = currentDate.toLocaleTimeString(); // Formats time as HH:MM:SS AM/PM
-  
-      // Display current date and time in PDF
-      doc.text('6. Out Time:', 20, 100);
-      doc.text(`${formattedTime} & ${formattedDate}`|| '', 70, 100); // Use formatted time
-      
-      doc.setFont("times", "italic"); // Reset font size if needed
-      doc.text('Note: It is mandatory to return to college by 8:30 PM.', 20, 110);
-      
-    
-      
-      doc.rect(15, 45, 180, 70); // Student Information Section border
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.message);
+        console.error('Error updating gate pass:', data.message);
+      } else {
+        sendSMS(parentno);
+        console.log('Gate pass updated successfully.');
 
-
-      // sendSMS(userData.parentno, `Pink Pass generated for ${userData.sname}`);
-      const fileName = `${userData.studentId}_PinkPass.pdf`;
-      doc.save(fileName);
-    } else {
-      alert("No user data to generate the Pink Pass.");
-    }
-  };
-  const generatePinkPassPDF1 = () => {
-    if (fingerprintData) {
-      const doc = new jsPDF();
-      doc.setFontSize(10);
-      doc.setFontSize(16);
-      doc.text('GMR VARALAKSHMI FOUNDATION', 60, 20);
-      doc.setFontSize(12);
-      doc.text('REQUISITION FOR PERMISSION TO LEAVE THE HOSTEL', 50, 28);
-      doc.text('GMR Nagar, RAJAM-532 127', 80, 36);
-      doc.text('No: ', 160, 36); 
-      doc.rect(15, 10, 180, 30);
-
-      doc.setFontSize(10);
-      doc.text('1. Name of the Student:', 20, 50);
-      doc.text(fingerprintData.sname || '', 70, 50);
-      doc.text('2. JNTU Registration No:', 20, 60);
-      doc.text(fingerprintData.studentId || '', 70, 60);
-      doc.text('3. Branch & Year of Study:', 20, 70);
-      doc.text(`${fingerprintData.branch} & ${fingerprintData.syear}` || '', 70, 70);
-      doc.text('4. Name of the Hostel:', 20, 80);
-      doc.text(fingerprintData.hostelblock || '', 70, 80);
-      doc.text('5. Room No:', 20, 90);
-      doc.text(fingerprintData.roomno || '', 70, 90);
-      const currentDate = new Date();
-      const formattedDate = currentDate.toLocaleDateString(); // Formats date as MM/DD/YYYY
-      const formattedTime = currentDate.toLocaleTimeString(); // Formats time as HH:MM:SS AM/PM
-  
-      // Display current date and time in PDF
-      doc.text('6. Out Time:', 20, 100);
-      doc.text(`${formattedTime} & ${formattedDate}`|| '', 70, 100); // Use formatted time
-      
-      doc.setFont("times", "italic"); // Reset font size if needed
-      doc.text('Note: It is mandatory to return to college by 8:30 PM.', 20, 110);
-      
-    
-      
-      doc.rect(15, 45, 180, 70); // Student Information Section border
-
-
-      // sendSMS(userData.parentno, `Pink Pass generated for ${userData.sname}`);
-      const fileName = `${fingerprintData.studentId}_PinkPass.pdf`;
-      doc.save(fileName);
-    } else {
-      alert("No user data to generate the Pink Pass.");
+        setError("");
+        // Send a WhatsApp message to the parent
+        // await sendWhatsAppMessage(parentWhatsAppNumber, 'The MSG SENT successfully.');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Server error occurred while updating the gate pass.');
     }
   };
  
-  // Function to generate Outpass PDF
+  
+   // Function to update gate pass with current date and time
+   
   
  
   const handleVerifyFingerprint = async () => {
@@ -197,7 +106,7 @@ const Pass = () => {
         // Assuming data is the student object now
         if (data && Object.keys(data).length > 0) {
             setFingerprintData(data); // Set the entire student data
-            await updateGatepass(data.studentId); // Use data.studentId
+            await updateGatepass(data.studentId,data.parentno); // Use data.studentId
         } else {
             alert("No user found.");
         }
@@ -209,7 +118,7 @@ const Pass = () => {
 
   return (
     <div className="p-5">
-      <h1 className="text-center text-2xl font-bold">GatePass Generation</h1>
+      <h1 className="text-center text-2xl font-bold">PinkPass</h1>
       {/* <p className="text-center">Welcome to the Gate Pass Generation system.</p> */}
       
       <div className="button-container text-center mb-5">
@@ -228,7 +137,7 @@ const Pass = () => {
         placeholder="Enter Roll Number" 
         className="border rounded w-1/3 px-3 py-2 mx-auto mb-4 block"
       />
-       {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+       {error && <p style={{ color: 'white', textAlign: 'center' }}>{error}</p>}
 
       {(!error) && fingerprintData && (
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
@@ -262,17 +171,10 @@ const Pass = () => {
                     </div>
                   
           <br />
-          <div style={{ margin: '20px 0' }}>
-            <strong className='text-white'>Outing Count for Current Month: {fingerprintData.gatepassCount}</strong>
-            {fingerprintData.gatepassCount > 4 && (
-                <button className="border border-white text-white font-semibold py-2 ml-4 px-4 rounded hover:bg-gray-900 transition duration-200">
-                    Get Permission
-                </button>
-            )}
-        </div>
-          <button className="bg-gray-900 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200 " onClick={generatePinkPassPDF1}>
+         
+          {/* <button className="bg-gray-900 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200 " onClick={generatePinkPassPDF1}>
             Print Pink Pass
-          </button>
+          </button> */}
           {/* <button className="bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200 ml-2" onClick={generateOutpassPDF1}>
             Print Outpass
           </button> */}
@@ -319,19 +221,12 @@ const Pass = () => {
         <br />
         
         {/* Display Gatepass Count */}
-        <div style={{ margin: '20px 0' }}>
-            <strong className='text-white'>Outing Count for Current Month: {userData.gatepassCount}</strong>
-            {userData.gatepassCount > 4 && (
-                <button className=" border border-white text-white font-semibold py-2 ml-4 px-4 rounded hover:bg-gray-900 transition duration-200">
-                    Get Permission
-                </button>
-            )}
-        </div>
+       
 
         {/* Print Buttons */}
-        <button className=" bg-gray-900 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200" onClick={generatePinkPassPDF}>
+        {/* <button className=" bg-gray-900 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200" onClick={generatePinkPassPDF}>
             Print Pink Pass
-        </button>
+        </button> */}
         {/* <button className=" bg-gray-800 text-white font-semibold py-2 ml-3 px-4 rounded hover:bg-gray-700 transition duration-200" onClick={generateOutpassPDF}>
             Print Outpass
         </button> */}

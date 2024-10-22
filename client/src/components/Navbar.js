@@ -44,24 +44,40 @@ const Navbar = ({ username }) => {
                 <Link to="/registration/moreImages" style={{ fontSize: '13px' }}>Student Images</Link>
               </div>
             </li>
-          )}
 
+            
+
+
+          )}
+  {/* admin checkout */}
+{username === 'admin' && (
+<li className="dropdown">
+            <Link to="/AdminPass">
+              <span className='flex items-center'>CheckOut<FaCaretDown className="ml-1" /></span>
+            </Link>
+            <div className="dropdown-content">
+              <Link to="/AdminPass" style={{ fontSize: '13px' }}>PinkPass</Link>
+              <Link to="/Adminoutpass" style={{ fontSize: '13px' }}>OutPass</Link>
+            </div>
+          </li>
+ )}
+ {username === 'guard' && (
           <li className="dropdown">
             <Link to="/Pass">
               <span className='flex items-center'>CheckOut<FaCaretDown className="ml-1" /></span>
             </Link>
             <div className="dropdown-content">
-              <Link to="/Pass" style={{ fontSize: '13px' }}>GatePass</Link>
+              <Link to="/Pass" style={{ fontSize: '13px' }}>PinkPass</Link>
               <Link to="/outpass" style={{ fontSize: '13px' }}>OutPass</Link>
             </div>
           </li>
-
+ )}
           <li className="dropdown">
             <Link to="/Checkingate">
               <span className='flex items-center'>CheckIn<FaCaretDown className="ml-1" /></span>
             </Link>
             <div className="dropdown-content">
-              <Link to="/checkingate" style={{ fontSize: '13px' }}>Gatepass</Link>
+              <Link to="/checkingate" style={{ fontSize: '13px' }}>Pinkpass</Link>
               <Link to="/checkinout" style={{ fontSize: '13px' }}>Outpass</Link>
             </div>
           </li>

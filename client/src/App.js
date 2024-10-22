@@ -2,6 +2,8 @@ import React,{useState} from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Pass from './components/Pass';
+import AdminPass from './components/AdminPass';
+
 import Registration from './components/Registration';
 import Reports from './components/Reports';
 import StudentDetails from './components/StudentDetails';
@@ -13,6 +15,7 @@ import Login from './components/Login';
 import Home from './components/Home';
 import { FaUserCircle } from 'react-icons/fa';
 import './App.css';  // Import the App styles
+import AdminOutpass from './components/AdminOutpass';
 
 function App() {
   const [username, setUsername] = useState('');
@@ -45,6 +48,50 @@ function App() {
             } 
           />
           
+
+          <Route 
+            path="/AdminPass" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                <div className="fullscreen-bg"></div> 
+                <div className="overlay"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"Verdana, Geneva, Tahoma, sans-serif"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <AdminPass />
+                </div>
+              </PrivateRoute>
+            } 
+          />
+          
+
+          <Route 
+            path="/Adminoutpass" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                <div className="fullscreen-bg"></div> 
+                <div className="overlay"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <AdminOutpass />
+                </div>
+              </PrivateRoute>
+            } 
+          />
+
           <Route 
             path="/outpass" 
             element={

@@ -1,10 +1,29 @@
 import React, { useState } from 'react';
-
+import axios from 'axios';
 const Checkingate = () => {
   const [rollNo, setRollNo] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
+
+
+
+
+  const sendSMS = async ( message) => {
+    try {
+        const response = await axios.post('http://localhost:3300/send-sms-in', {
+           
+            message: message
+        });
+        if (response.data.success) {
+            console.log('SMS sent successfully!');
+        } else {
+            console.error('Failed to send SMS:', response.data.message);
+        }
+    } catch (error) {
+        console.error('Error sending SMS:', error);
+    }
+};
   // Function to verify fingerprint independently
   const handleFingerprintVerify = async () => {
     setError('');
@@ -19,8 +38,8 @@ const Checkingate = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setMessage('Fingerprint verified successfully!');
-        console.log('User data from fingerprint:', data);
+        sendSMS(data.parentno);
+       
       } else {
         setError('Fingerprint verification failed.');
       }
@@ -49,7 +68,8 @@ const Checkingate = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setMessage('Check-in successful! ' + data.message);
+        sendSMS(data.parentno);
+        setMessage('Check-in successful! ');
         setError('');
       } else if (response.status === 404) {
         setError('No pending checkout record found for the roll number.');
@@ -83,7 +103,7 @@ const Checkingate = () => {
         </button>
       </div> */}
 
-      <h1 className="text-center text-2xl font-bold">Checkin for Gatepass</h1>
+      <h1 className="text-center text-2xl font-bold">Checkin for Pinkpass</h1>
       {/* <p className="text-center">Welcome to the Gate Pass Generation system.</p> */}
       
       <div className="button-container text-center mb-5">

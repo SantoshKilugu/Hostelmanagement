@@ -381,11 +381,42 @@ const to = '+917993675966';  // Ensure the number is formatted correctly, e.g. w
 const id = '1407166599141887662';  // Ensure this template ID is correct and matches the message content
 const p1='Dear Parent, Pink Pass issued for your ward at';
 const p3 = 'and will be reaching home';
-app.post('/send-sms', async (req, res) => {
+app.post('/send-sms-pink', async (req, res) => {
     const { message } = req.body;
     
     // Ensure the message is URL encoded to handle any special characters
-    const encodedMessage = encodeURIComponent(message);
+   
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString();
+    const formattedTime = currentDate.toLocaleTimeString();
+
+    const p =`${p1}+${formattedTime}+${formattedDate}+${p3}`;
+    // Construct the API URL
+    const smsApiUrl = `https://www.smsstriker.com/API/sms.php?username=${username}&password=${password}&from=${from}&to=${message}&msg=${p}&type=1&template_id=${id}`;
+
+    try {
+        // Make the API request
+        const response = await axios.get(smsApiUrl);
+        
+        // Log the full response for debugging purposes
+        // console.log('SMS API Response:', response.data);
+        
+        // Send a successful response to the client
+        res.status(200).json({ success: true, data: response.data });
+    } catch (error) {
+        // Log the error details for troubleshooting
+        console.error('Error sending SMS:', error.response ? error.response.data : error.message);
+
+        // Send a failure response to the client
+        res.status(500).json({ success: false, message: 'Error sending SMS', error: error.response ? error.response.data : error.message });
+    }
+});
+
+app.post('/send-sms-out', async (req, res) => {
+    const { message } = req.body;
+    
+    // Ensure the message is URL encoded to handle any special characters
+   
     const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString();
     const p =`${p1}+${formattedDate}+${p3}`;
@@ -397,7 +428,41 @@ app.post('/send-sms', async (req, res) => {
         const response = await axios.get(smsApiUrl);
         
         // Log the full response for debugging purposes
-        console.log('SMS API Response:', response.data);
+        // console.log('SMS API Response:', response.data);
+        
+        // Send a successful response to the client
+        res.status(200).json({ success: true, data: response.data });
+    } catch (error) {
+        // Log the error details for troubleshooting
+        console.error('Error sending SMS:', error.response ? error.response.data : error.message);
+
+        // Send a failure response to the client
+        res.status(500).json({ success: false, message: 'Error sending SMS', error: error.response ? error.response.data : error.message });
+    }
+});
+
+
+const id1 = '1407166599148308069';  // Ensure this template ID is correct and matches the message content
+const p4='Dear Parent,Your ward has reported back at hostel at ';
+
+app.post('/send-sms-in', async (req, res) => {
+    const { message } = req.body;
+    
+    // Ensure the message is URL encoded to handle any special characters
+   
+    const currentDate1 = new Date();
+    const formattedDate1 = currentDate1.toLocaleDateString();
+    const formattedTime = currentDate1.toLocaleTimeString();
+    const p =`${p4}+${formattedTime}+${formattedDate1}`;
+    // Construct the API URL
+    const smsApiUrl = `https://www.smsstriker.com/API/sms.php?username=${username}&password=${password}&from=${from}&to=${message}&msg=${p}&type=1&template_id=${id1}`;
+
+    try {
+        // Make the API request
+        const response = await axios.get(smsApiUrl);
+        
+        // Log the full response for debugging purposes
+        // console.log('SMS API Response:', response.data);
         
         // Send a successful response to the client
         res.status(200).json({ success: true, data: response.data });
@@ -413,9 +478,7 @@ app.post('/send-sms', async (req, res) => {
 
 // Endpoint to update the Gatepass table
 app.post('/update-gatepass', async (req, res) => {
-    const { roll_no } = req.body; // Get roll number from request body
-
-    // Get current date and time
+    const { roll_no } = req.body;
     const currentDateTime = new Date();
 
     // Function to format date and time as 'YYYY-MM-DD HH:MM:SS'
@@ -430,7 +493,138 @@ app.post('/update-gatepass', async (req, res) => {
     };
 
     const formattedDateTime = formatDateTime(currentDateTime);
-    console.log("Formatted DateTime:", formattedDateTime); // To verify the format
+    console.log("Formatted DateTime:", formattedDateTime);
+
+    try {
+        // Check if there is an existing record with outTime NULL
+        const checkQuery = `
+            SELECT * FROM Gatepass
+            WHERE roll_no = ? AND outTime IS NULL
+            ORDER BY gatepassID DESC
+            LIMIT 1
+        `;
+        const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+
+        if (rows.length === 0) {
+            res.status(400).send({ message: 'No active issue found for this roll number.' });
+            return;
+        }
+
+        const existingRecord = rows[0];
+        const expectedOutTime = new Date(existingRecord.expectedOutTime);
+
+        // Calculate time difference in hours
+        const timeDifferenceInHours = (expectedOutTime - currentDateTime) / (1000 * 60 * 60);
+
+        // If the time is over
+        if (timeDifferenceInHours <= -2) {
+            // Delete the student record from the database
+            const deleteQuery = `
+                DELETE FROM Gatepass WHERE gatepassID = ?
+            `;
+            await dbconnect.execute(deleteQuery, [existingRecord.gatepassID]);
+            res.status(400).send({ message: 'Your time is over, and your issued pass has been rejected.' });
+            return;
+        }
+        if (timeDifferenceInHours >=2) {
+            // Delete the student record from the database
+            
+            res.status(400).send({ message: 'You have still time to go.' });
+            return;
+        }
+
+        // Update the outTime if valid
+        const updateQuery = `
+            UPDATE Gatepass SET outTime = ? WHERE gatepassID = ?
+        `;
+        await dbconnect.execute(updateQuery, [formattedDateTime, existingRecord.gatepassID]);
+
+        res.status(200).send({ message: 'Gatepass updated successfully!' });
+    } catch (error) {
+        console.error('Error updating Gatepass:', error);
+        res.status(500).send({ error: 'Failed to update Gatepass.' });
+    }
+});
+
+
+
+
+
+// // Endpoint to update the Gatepass table
+// app.post('/update-gatepass', async (req, res) => {
+//     const { roll_no } = req.body; // Get roll number from request body
+
+//     // Get current date and time
+//     const currentDateTime = new Date();
+
+//     // Function to format date and time as 'YYYY-MM-DD HH:MM:SS'
+//     const formatDateTime = (date) => {
+//         const year = date.getFullYear();
+//         const month = String(date.getMonth() + 1).padStart(2, '0');
+//         const day = String(date.getDate()).padStart(2, '0');
+//         const hours = String(date.getHours()).padStart(2, '0');
+//         const minutes = String(date.getMinutes()).padStart(2, '0');
+//         const seconds = String(date.getSeconds()).padStart(2, '0');
+//         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+//     };
+
+//     const formattedDateTime = formatDateTime(currentDateTime);
+//     console.log("Formatted DateTime:", formattedDateTime); // To verify the format
+
+//     try {
+//         // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction)
+//         const checkQuery = `
+//             SELECT * FROM Gatepass
+//             WHERE roll_no = ?
+//             ORDER BY gatepassID DESC
+//             LIMIT 1
+//         `;
+//         const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+//         const outpassCheckQuery = `
+//         SELECT * FROM Outpass
+//         WHERE roll_no = ?
+//         ORDER BY outpassID DESC
+//         LIMIT 1
+//     `;
+//     const [outpassRows] = await dbconnect.execute(outpassCheckQuery, [roll_no]);
+//     const gatepassIncomplete = rows.length > 0 && rows[0].inTime === null;
+//     const outpassIncomplete = outpassRows.length > 0 && outpassRows[0].inTime === null;
+
+//     // If either the Gatepass or Outpass tables have an incomplete transaction, block the insertion
+//     if (gatepassIncomplete || outpassIncomplete) {
+//         res.status(400).send({ 
+//             message: 'Cannot create new gatepass. The student has not yet returned from a previous outing (either Gatepass or Outpass is incomplete).' 
+//         });
+//     } else {
+//         // Insert a new record into the Gatepass table
+//         const insertQuery = `
+//             INSERT INTO Gatepass (roll_no, outTime, date)
+//             VALUES (?, ?, ?)
+//         `;
+//         const values = [roll_no, formattedDateTime, formattedDateTime.split(' ')[0]]; // Insert formatted datetime and date
+
+//         await dbconnect.execute(insertQuery, values);
+//         res.status(200).send({ message: 'Gatepass updated successfully!' });
+//     }
+//     } catch (error) {
+//         console.error('Error updating Gatepass:', error);
+//         res.status(500).send({ error: 'Failed to update Gatepass.' });
+//     }
+// });
+
+
+// Endpoint to update the Gatepass table
+app.post('/update-gatepass-issue', async (req, res) => {
+    const { roll_no, current_time, expected_out_time  } = req.body; // Get roll number from request body
+    if (!roll_no || !current_time || !expected_out_time) {
+        return res.status(400).json({ message: 'Invalid data provided.' });
+      }
+  
+      const currentDateTime = new Date(current_time);
+      const expectedDateTime = new Date(expected_out_time);
+
+   
+    console.log("Formatted DateTime:",currentDateTime, expectedDateTime ); // To verify the format
 
     try {
         // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction)
@@ -452,17 +646,23 @@ app.post('/update-gatepass', async (req, res) => {
     const outpassIncomplete = outpassRows.length > 0 && outpassRows[0].inTime === null;
 
     // If either the Gatepass or Outpass tables have an incomplete transaction, block the insertion
-    if (gatepassIncomplete || outpassIncomplete) {
+    if (gatepassIncomplete) {
         res.status(400).send({ 
-            message: 'Cannot create new gatepass. The student has not yet returned from a previous outing (either Gatepass or Outpass is incomplete).' 
+            message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (pink pass).' 
         });
-    } else {
+    } 
+    else if(outpassIncomplete){
+        res.status(400).send({ 
+            message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (ou tpass).' 
+        });
+    }
+else {
         // Insert a new record into the Gatepass table
         const insertQuery = `
-            INSERT INTO Gatepass (roll_no, outTime, date)
+            INSERT INTO Gatepass (roll_no, issueTime, expOutTime)
             VALUES (?, ?, ?)
         `;
-        const values = [roll_no, formattedDateTime, formattedDateTime.split(' ')[0]]; // Insert formatted datetime and date
+        const values = [roll_no, currentDateTime, expectedDateTime]; // Insert formatted datetime and date
 
         await dbconnect.execute(insertQuery, values);
         res.status(200).send({ message: 'Gatepass updated successfully!' });
@@ -474,10 +674,72 @@ app.post('/update-gatepass', async (req, res) => {
 });
 
 
-app.post('/update-outpass', async (req, res) => {
-    const { roll_no } = req.body; // Get roll number from request body
 
-    // Get current date and time
+
+// Endpoint to update the Gatepass table
+app.post('/update-outpass-issue', async (req, res) => {
+    const { roll_no,  expected_out_time  } = req.body; // Get roll number from request body
+    if (!roll_no  || !expected_out_time) {
+        return res.status(400).json({ message: 'Invalid data provided.' });
+      }
+  
+      
+      const expectedDateTime = new Date(expected_out_time);
+
+     console.log(expectedDateTime);
+   // To verify the format
+
+    try {
+        // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction)
+        const checkQuery = `
+            SELECT * FROM Gatepass
+            WHERE roll_no = ?
+            ORDER BY gatepassID DESC
+            LIMIT 1
+        `;
+        const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+        const outpassCheckQuery = `
+        SELECT * FROM Outpass
+        WHERE roll_no = ?
+        ORDER BY outpassID DESC
+        LIMIT 1
+    `;
+    const [outpassRows] = await dbconnect.execute(outpassCheckQuery, [roll_no]);
+    const gatepassIncomplete = rows.length > 0 && rows[0].inTime === null;
+    const outpassIncomplete = outpassRows.length > 0 && outpassRows[0].inTime === null;
+
+    // If either the Gatepass or Outpass tables have an incomplete transaction, block the insertion
+    if (gatepassIncomplete) {
+        res.status(400).send({ 
+            message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (pink pass).' 
+        });
+    } 
+    else if(outpassIncomplete){
+        res.status(400).send({ 
+            message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (out pass).' 
+        });
+    }
+else {
+        // Insert a new record into the Gatepass table
+        const insertQuery = `
+            INSERT INTO outpass (roll_no, expOutTime)
+            VALUES (?, ?)
+        `;
+        const values = [roll_no, expected_out_time]; // Insert formatted datetime and date
+
+        await dbconnect.execute(insertQuery, values);
+        res.status(200).send({ message: 'Outpass updated successfully!' });
+    }
+    } catch (error) {
+        console.error('Error updating Outpass:', error);
+        res.status(500).send({ error: 'Failed to update Outpass.' });
+    }
+});
+
+
+// Endpoint to update the outpass table
+app.post('/update-outpass', async (req, res) => {
+    const { roll_no } = req.body;
     const currentDateTime = new Date();
 
     // Function to format date and time as 'YYYY-MM-DD HH:MM:SS'
@@ -492,52 +754,67 @@ app.post('/update-outpass', async (req, res) => {
     };
 
     const formattedDateTime = formatDateTime(currentDateTime);
-    console.log("Formatted DateTime:", formattedDateTime); // To verify the format
-
+    console.log("Formatted DateTime:", formattedDateTime);//2024-10-22 09:54:59
+   
     try {
-        // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction) in the Outpass table
-        const outpassCheckQuery = `
-            SELECT * FROM Outpass
-            WHERE roll_no = ?
+        // Check if there is an existing record with outTime NULL
+        const checkQuery = `
+            SELECT * FROM outpass
+            WHERE roll_no = ? AND outTime IS NULL
             ORDER BY outpassID DESC
             LIMIT 1
         `;
-        const [outpassRows] = await dbconnect.execute(outpassCheckQuery, [roll_no]);
-    
-        // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction) in the Gatepass table
-        const gatepassCheckQuery = `
-            SELECT * FROM Gatepass
-            WHERE roll_no = ?
-            ORDER BY gatepassID DESC
-            LIMIT 1
-        `;
-        const [gatepassRows] = await dbconnect.execute(gatepassCheckQuery, [roll_no]);
+        const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
 
-        // Check for incomplete transactions in both Outpass and Gatepass tables
-        const outpassIncomplete = outpassRows.length > 0 && outpassRows[0].inTime === null;
-        const gatepassIncomplete = gatepassRows.length > 0 && gatepassRows[0].inTime === null;
-
-        // If either the Outpass or Gatepass tables have an incomplete transaction, block the insertion
-        if (outpassIncomplete || gatepassIncomplete) {
-            res.status(400).send({ 
-                message: 'Cannot create new outpass. The student has not yet returned from a previous outing (either Gatepass or Outpass is incomplete).' 
-            });
-        } else {
-            // Insert a new record into the Outpass table
-            const insertQuery = `
-                INSERT INTO Outpass (roll_no, outTime, date)
-                VALUES (?, ?, ?)
-            `;
-            const values = [roll_no, formattedDateTime, formattedDateTime.split(' ')[0]]; // Insert formatted datetime and date
-    
-            await dbconnect.execute(insertQuery, values);
-            res.status(200).send({ message: 'Outpass updated successfully!' });
+        if (rows.length === 0) {
+            res.status(400).send({ message: 'No active issue found for this roll number.' });
+            return;
         }
+
+        const existingRecord = rows[0];
+        const expectedOutTime = new Date(existingRecord.expOutTime);
+        const timeDifferenceInHours = (currentDateTime - expectedOutTime) / (1000 * 60 * 60);
+  console.log("diff",timeDifferenceInHours);
+  console.log("exp DateTime:", existingRecord.expOutTime);//2024-10-22 09:58:00
+  console.log("exxx",expectedOutTime)
+        // If the time is over
+        if ((timeDifferenceInHours >=2))  {
+
+            // Delete the student record from the database
+            const deleteQuery = `
+                DELETE FROM outpass WHERE outpassID = ?
+            `;
+            await dbconnect.execute(deleteQuery, [existingRecord.outpassID]);
+            res.status(400).send({ message: 'Your time is over, and your issued pass has been rejected.' });
+            return;
+        }
+        if ((timeDifferenceInHours < -2))  {
+
+            // Delete the student record from the database
+            // const deleteQuery = `
+            //     DELETE FROM outpass WHERE outpassID = ?
+            // `;
+            // await dbconnect.execute(deleteQuery, [existingRecord.outpassID]);
+            res.status(400).send({ message: 'You have still time to go.' });
+            return;
+        }
+
+        // Update the outTime if valid
+        const updateQuery = `
+            UPDATE outpass SET outTime = ? WHERE outpassID = ?
+        `;
+        await dbconnect.execute(updateQuery, [formattedDateTime, existingRecord.outpassID]);
+        res.status(200).send({
+            message: 'Outpass updated successfully!',
+            expectedOutTime: formatDateTime(expectedOutTime),  // Include expectedOutTime only on success
+        }); 
     } catch (error) {
-        console.error('Error updating outpass:', error);
-        res.status(500).send({ error: 'Failed to update outpass.' });
+        console.error('Error updating Outpass:', error);
+        res.status(500).send({ error: 'Failed to update Outpass.' });
     }
 });
+
+
 
 
 // Endpoint to upload an Excel file
@@ -1141,8 +1418,24 @@ app.post('/run-jar-verify-checkin', async (req, res) => {
                 WHERE roll_no = ? AND outTime IS NOT NULL AND inTime IS NULL
             `;
             await dbconnect.execute(updateQuery, [currentDateTime, id]);
-    
-            res.status(200).send({ message: 'Check-in time for gatepass updated successfully!' });
+            const studentQuery = `
+            SELECT sname,parentno FROM users WHERE studentId = ?
+        `;
+        const [studentData] = await dbconnect.execute(studentQuery, [id]);
+
+        if (studentData.length === 0) {
+            return res.status(404).send('Student data not found');
+        }
+
+        const student = studentData[0];
+        // console.log(`Parent Contact for student ${id}: ${student.parentContact}`);
+
+        // Send the success message and student data back to the frontend
+        res.status(200).json({
+            parentno:student.parentno
+        });
+            
+            // res.status(200).send({ message: 'Check-in time for gatepass updated successfully!' });
         } catch (dbError) {
             console.error('Database query failed:', dbError);
             res.status(500).send('Database query failed.');
@@ -1183,8 +1476,23 @@ app.post('/run-jar-verify-checkin-out', async (req, res) => {
                 WHERE roll_no = ? AND outTime IS NOT NULL AND inTime IS NULL
             `;
             await dbconnect.execute(updateQuery, [currentDateTime, id]);
-    
-            res.status(200).send({ message: 'Check-in time for outpass updated successfully!' });
+            const studentQuery = `
+            SELECT sname,parentno FROM users WHERE studentId = ?
+        `;
+        const [studentData] = await dbconnect.execute(studentQuery, [id]);
+
+        if (studentData.length === 0) {
+            return res.status(404).send('Student data not found');
+        }
+
+        const student = studentData[0];
+        // console.log(`Parent Contact for student ${id}: ${student.parentContact}`);
+
+        // Send the success message and student data back to the frontend
+        res.status(200).json({
+            parentno:student.parentno
+        });
+            
         } catch (dbError) {
             console.error('Database query failed:', dbError);
             res.status(500).send('Database query failed.');
@@ -1217,8 +1525,23 @@ app.patch('/checkin-out/:roll_no', async (req, res) => {
             WHERE roll_no = ? AND outTime IS NOT NULL AND inTime IS NULL
         `;
         await dbconnect.execute(updateQuery, [formattedDateTime, roll_no]);
+        const studentQuery = `
+        SELECT sname,parentno FROM users WHERE studentId = ?
+    `;
+    const [studentData] = await dbconnect.execute(studentQuery, [roll_no]);
 
-        res.status(200).send({ message: 'Check-in time for outpass updated successfully!' });
+    if (studentData.length === 0) {
+        return res.status(404).send('Student data not found');
+    }
+
+    // Send the student data along with success message
+    const student = studentData[0];
+    // console.log(`Parent Contact for student ${roll_no}: ${student.parentContact}`);
+    
+    res.status(200).json({
+        parentno:student.parentno
+    });
+        
     } catch (dbError) {
         console.error('Database query failed:', dbError);
         res.status(500).send('Database query failed.');
