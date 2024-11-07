@@ -26,9 +26,11 @@ function StudentDetails() {
             }
             const data = await response.json();
             setStudentData(data);
+           console.log(data.imageUrl);
             setError(''); // Clear any previous errors
             setFilteredData(data.gatepasses); 
             setFilteredOutData(data.outpasses);
+
         } catch (err) {
             setError(err.message);
             setStudentData(null); // Reset student data on error
@@ -174,7 +176,7 @@ function StudentDetails() {
                                 className="h-32 w-32 object-cover rounded mr-6" 
                             />
                         ) : (
-                            <span>No image available</span>
+                            <span>No image</span>
                         )}
                         {/* Details Section */}
                         <div className="grid grid-cols-3 gap-x-8 gap-y-4">
@@ -186,7 +188,7 @@ function StudentDetails() {
                             <div><strong>Hostel Name:</strong> {studentData.hostelblock}</div>
                             <div><strong>Room No:</strong> {studentData.roomno}</div>
                             <div><strong>Gatepass Count:</strong> {studentData.gatepassCount}</div>
-                            <div><strong>Parent No:</strong> {studentData.parentno}</div>
+                            <div><strong>Parent Mobile No:</strong> {studentData.parentno}</div>
                         </div>
                     </div>
                   

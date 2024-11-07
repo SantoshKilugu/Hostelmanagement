@@ -47,7 +47,7 @@ const Outpass = () => {
   // Function to update gate pass with current date and time
   const updateGatepass = async (rollNo,parentno) => {
     try {
-      const response = await fetch(`http://localhost:3300/update-outpass`, {
+      const response = await fetch(`http://localhost:3300/update-outpass-guard`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,6 +72,78 @@ const Outpass = () => {
   };
   
   
+
+//   app.post('/update-outpass', async (req, res) => {
+//     const { roll_no } = req.body;
+//     const currentDateTime = new Date();
+//     const currentDay = currentDateTime.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+
+//     // Function to format date and time as 'YYYY-MM-DD HH:MM:SS'
+//     const formatDateTime = (date) => {
+//         const year = date.getFullYear();
+//         const month = String(date.getMonth() + 1).padStart(2, '0');
+//         const day = String(date.getDate()).padStart(2, '0');
+//         const hours = String(date.getHours()).padStart(2, '0');
+//         const minutes = String(date.getMinutes()).padStart(2, '0');
+//         const seconds = String(date.getSeconds()).padStart(2, '0');
+//         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+//     };
+
+//     const formattedDateTime = formatDateTime(currentDateTime);
+//     console.log("Formatted DateTime:", formattedDateTime);
+
+//     try {
+//         // Check if there’s a recent outpass record within the current week
+//         const checkQuery = `
+//             SELECT * FROM outpass
+//             WHERE roll_no = ? AND WEEKOFYEAR(issueDate) = WEEKOFYEAR(NOW())
+//             ORDER BY issueDate DESC
+//             LIMIT 1
+//         `;
+//         const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+
+//         if (rows.length > 0) {
+//             const lastOutpassDate = new Date(rows[0].issueDate);
+//             const daysDifference = (currentDateTime - lastOutpassDate) / (1000 * 60 * 60 * 24);
+
+//             if (daysDifference < 2 && currentDay !== 0) { // Ensure it’s not Sunday for weekly reset
+//                 return res.status(400).send({ message: 'You took an outpass yesterday. You can take it again tomorrow.' });
+//             }
+//         }
+
+//         // Check for expired passes and clean up as before
+//         const existingRecord = rows[0];
+//         const expectedOutTime = new Date(existingRecord.expOutTime);
+//         const timeDifferenceInHours = (currentDateTime - expectedOutTime) / (1000 * 60 * 60);
+
+//         if (timeDifferenceInHours >= 2) {
+//             const deleteQuery = `DELETE FROM outpass WHERE outpassID = ?`;
+//             await dbconnect.execute(deleteQuery, [existingRecord.outpassID]);
+//             return res.status(400).send({ message: 'Your time is over, and your issued pass has been rejected.' });
+//         }
+//         if (timeDifferenceInHours < -2) {
+//             return res.status(400).send({ message: 'You have still time to go.' });
+//         }
+
+//         // Update outTime if valid
+//         const updateQuery = `UPDATE outpass SET outTime = ? WHERE outpassID = ?`;
+//         await dbconnect.execute(updateQuery, [formattedDateTime, existingRecord.outpassID]);
+//         res.status(200).send({
+//             message: 'Outpass updated successfully!',
+//             expectedOutTime: formatDateTime(expectedOutTime),
+//         });
+//     } catch (error) {
+//         console.error('Error updating Outpass:', error);
+//         res.status(500).send({ error: 'Failed to update Outpass.' });
+//     }
+// });
+
+
+
+
+
+
+
   
   // Function to generate Pink Pass PDF
  
@@ -368,7 +440,7 @@ const base64image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAACICAYAAAD
                       <div><strong>Hostel Name:</strong> {fingerprintData.hostelblock}</div>
                       <div><strong>Room No:</strong> {fingerprintData.roomno}</div>
                       {/* <div><strong>Gatepass Count:</strong> {userData.gatepassCount}</div> */}
-                      <div><strong>Parent No:</strong> {fingerprintData.parentno}</div>
+                      <div><strong>Parent Mobile No:</strong> {fingerprintData.parentno}</div>
                       
                       <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
                       <div><strong>Time:</strong> {new Date().toLocaleTimeString()}</div>
@@ -422,7 +494,7 @@ const base64image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAACICAYAAAD
                             <div><strong>Hostel Name:</strong> {userData.hostelblock}</div>
                             <div><strong>Room No:</strong> {userData.roomno}</div>
                             {/* <div><strong>Gatepass Count:</strong> {userData.gatepassCount}</div> */}
-                            <div><strong>Parent No:</strong> {userData.parentno}</div>
+                            <div><strong>Parent Mobile No:</strong> {userData.parentno}</div>
                             
                             <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
                             <div><strong>Time:</strong> {new Date().toLocaleTimeString()}</div>

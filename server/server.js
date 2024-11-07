@@ -722,7 +722,7 @@ app.post('/update-outpass-issue', async (req, res) => {
 else {
         // Insert a new record into the Gatepass table
         const insertQuery = `
-            INSERT INTO outpass (roll_no, expOutTime)
+            INSERT INTO Outpass (roll_no, expOutTime)
             VALUES (?, ?)
         `;
         const values = [roll_no, expected_out_time]; // Insert formatted datetime and date
@@ -738,7 +738,80 @@ else {
 
 
 // Endpoint to update the outpass table
-app.post('/update-outpass', async (req, res) => {
+app.post('/update-outpass-admin', async (req, res) => {
+    const { roll_no } = req.body;
+    const currentDateTime = new Date();
+
+    // Function to format date and time as 'YYYY-MM-DD HH:MM:SS'
+    const formatDateTime = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const formattedDateTime = formatDateTime(currentDateTime);
+    const formattedDate = formatDate(currentDateTime);
+    // console.log("Formatted DateTime:", formattedDateTime);//2024-10-22 09:54:59
+    try {
+        // Check if the last transaction for the student has non-null outTime but null inTime (incomplete transaction)
+        const checkQuery = `
+            SELECT * FROM Gatepass
+            WHERE roll_no = ?
+            ORDER BY gatepassID DESC
+            LIMIT 1
+        `;
+        const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+        const outpassCheckQuery = `
+        SELECT * FROM Outpass
+        WHERE roll_no = ?
+        ORDER BY outpassID DESC
+        LIMIT 1
+    `;
+    const [outpassRows] = await dbconnect.execute(outpassCheckQuery, [roll_no]);
+    const gatepassIncomplete = rows.length > 0 && rows[0].inTime === null;
+    const outpassIncomplete = outpassRows.length > 0 && outpassRows[0].inTime === null;
+
+    // If either the Gatepass or Outpass tables have an incomplete transaction, block the insertion
+    if (gatepassIncomplete) {
+        res.status(400).send({ 
+            message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (pink pass).' 
+        });
+    } 
+    else if(outpassIncomplete){
+        res.status(400).send({ 
+            message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (out pass).' 
+        });
+    }
+    else {
+        // Insert a new record into the Gatepass table
+        const insertQuery = `
+            INSERT INTO Outpass (roll_no, outTime,date)
+            VALUES (?, ?,?)
+        `;
+        const values = [roll_no, formattedDateTime,formattedDate]; // Insert formatted datetime and date
+
+        await dbconnect.execute(insertQuery, values);
+        res.status(200).send({ message: 'Outpass updated successfully!' });
+    }
+    } catch (error) {
+        console.error('Error updating Outpass:', error);
+        res.status(500).send({ error: 'Failed to update Outpass.' });
+    }
+});
+
+
+// Endpoint to update the outpass table
+app.post('/update-outpass-guard', async (req, res) => {
     const { roll_no } = req.body;
     const currentDateTime = new Date();
 
@@ -754,65 +827,100 @@ app.post('/update-outpass', async (req, res) => {
     };
 
     const formattedDateTime = formatDateTime(currentDateTime);
-    console.log("Formatted DateTime:", formattedDateTime);//2024-10-22 09:54:59
-   
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    const formattedDate = formatDate(currentDateTime);
+    // console.log("Formatted DateTime:", formattedDateTime);
+
     try {
-        // Check if there is an existing record with outTime NULL
-        const checkQuery = `
-            SELECT * FROM outpass
-            WHERE roll_no = ? AND outTime IS NULL
+        //if already taken today...
+        const checkTodayQuery = `
+            SELECT * FROM Outpass
+            WHERE roll_no = ? AND DATE(outTime) = ?
             ORDER BY outpassID DESC
             LIMIT 1
         `;
-        const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+        const [todayRows] = await dbconnect.execute(checkTodayQuery, [roll_no, formattedDate]);
 
-        if (rows.length === 0) {
-            res.status(400).send({ message: 'No active issue found for this roll number.' });
+        // If an outpass was already issued today, block the request
+        if (todayRows.length > 0) {
+            res.status(400).send({ message: 'You have already been issued outpass today. You can only request a new one tomorrow.' });
             return;
         }
 
-        const existingRecord = rows[0];
-        const expectedOutTime = new Date(existingRecord.expOutTime);
-        const timeDifferenceInHours = (currentDateTime - expectedOutTime) / (1000 * 60 * 60);
-  console.log("diff",timeDifferenceInHours);
-  console.log("exp DateTime:", existingRecord.expOutTime);//2024-10-22 09:58:00
-  console.log("exxx",expectedOutTime)
-        // If the time is over
-        if ((timeDifferenceInHours >=2))  {
 
-            // Delete the student record from the database
-            const deleteQuery = `
-                DELETE FROM outpass WHERE outpassID = ?
-            `;
-            await dbconnect.execute(deleteQuery, [existingRecord.outpassID]);
-            res.status(400).send({ message: 'Your time is over, and your issued pass has been rejected.' });
-            return;
-        }
-        if ((timeDifferenceInHours < -2))  {
 
-            // Delete the student record from the database
-            // const deleteQuery = `
-            //     DELETE FROM outpass WHERE outpassID = ?
-            // `;
-            // await dbconnect.execute(deleteQuery, [existingRecord.outpassID]);
-            res.status(400).send({ message: 'You have still time to go.' });
-            return;
-        }
+        // Check if there is an outpass issued yesterday
+        const yesterday = new Date(currentDateTime);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const formattedYesterday = formatDateTime(yesterday).split(' ')[0]; // Only date portion
 
-        // Update the outTime if valid
-        const updateQuery = `
-            UPDATE outpass SET outTime = ? WHERE outpassID = ?
+        const checkYesterdayQuery = `
+            SELECT * FROM Outpass
+            WHERE roll_no = ? AND DATE(outTime) = ?
+            ORDER BY outpassID DESC
+            LIMIT 1
         `;
-        await dbconnect.execute(updateQuery, [formattedDateTime, existingRecord.outpassID]);
-        res.status(200).send({
-            message: 'Outpass updated successfully!',
-            expectedOutTime: formatDateTime(expectedOutTime),  // Include expectedOutTime only on success
-        }); 
-    } catch (error) {
+        const [yesterdayRows] = await dbconnect.execute(checkYesterdayQuery, [roll_no, formattedYesterday]);
+
+        // If an outpass was issued yesterday, block today's request
+        if (yesterdayRows.length > 0) {
+            res.status(400).send({ message: 'You have already been issued outpass yesterday, so you can only request new one tomorrow.' });
+            return;
+        }
+
+        // Check if there is an existing record with outTime NULL
+        const checkQuery = `
+        SELECT * FROM Gatepass
+        WHERE roll_no = ?
+        ORDER BY gatepassID DESC
+        LIMIT 1
+    `;
+    const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+    const outpassCheckQuery = `
+    SELECT * FROM Outpass
+    WHERE roll_no = ?
+    ORDER BY outpassID DESC
+    LIMIT 1
+`;
+const [outpassRows] = await dbconnect.execute(outpassCheckQuery, [roll_no]);
+const gatepassIncomplete = rows.length > 0 && rows[0].inTime === null;
+const outpassIncomplete = outpassRows.length > 0 && outpassRows[0].inTime === null;
+
+
+
+
+if (gatepassIncomplete) {
+    res.status(400).send({ 
+        message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (pink pass).' 
+    });
+} 
+else if(outpassIncomplete){
+    res.status(400).send({ 
+        message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (out pass).' 
+    });
+}
+else {
+    // Insert a new record into the Gatepass table
+    const insertQuery = `
+        INSERT INTO Outpass (roll_no, outTime,date)
+        VALUES (?, ?,?)
+    `;
+    const values = [roll_no, formattedDateTime,formattedDate]; // Insert formatted datetime and date
+
+    await dbconnect.execute(insertQuery, values);
+    res.status(200).send({ message: 'Outpass updated successfully!' });
+}}
+catch (error) {
         console.error('Error updating Outpass:', error);
         res.status(500).send({ error: 'Failed to update Outpass.' });
     }
 });
+
 
 
 
@@ -896,7 +1004,7 @@ app.get('/get-student-details/:roll_no', async (req, res) => {
 
     try {
         // Fetch the student details
-        const studentQuery = `SELECT r.studentId, r.sname, r.syear, r.branch, r.hostelblock, r.roomno, r.parentno FROM users r WHERE r.studentId = ?`;
+        const studentQuery = `SELECT r.studentId, r.sname, r.syear, r.branch, r.hostelblock, r.roomno, r.parentno,r.imageUrl FROM users r WHERE r.studentId = ?`;
         const [studentRows] = await dbconnect.execute(studentQuery, [rollNo]);
 
         if (studentRows.length > 0) {
@@ -958,7 +1066,7 @@ app.get('/get-student-details/:roll_no', async (req, res) => {
                 outpasses: outpassRows,
                 gatepassCount: countRows[0].count, // Gatepass count for the current month
                 outpassCount: countoutRows[0].count, // Outpass count for the current month
-                imageUrl: imageRows.length > 0 ? imageRows[0].imageUrl : null // Fetching the image URL, if available
+                // imageUrl: imageRows.length > 0 ? imageRows[0].imageUrl : null // Fetching the image URL, if available
             };
 
             res.json(studentData);
@@ -1375,8 +1483,22 @@ app.patch('/checkin/:roll_no', async (req, res) => {
             WHERE roll_no = ? AND outTime IS NOT NULL AND inTime IS NULL
         `;
         await dbconnect.execute(updateQuery, [formattedDateTime, roll_no]);
+        const studentQuery = `
+        SELECT sname,parentno FROM users WHERE studentId = ?
+    `;
+    const [studentData] = await dbconnect.execute(studentQuery, [roll_no]);
 
-        res.status(200).send({ message: 'Check-in time for gatepass updated successfully!' });
+    if (studentData.length === 0) {
+        return res.status(404).send('Student data not found');
+    }
+
+    // Send the student data along with success message
+    const student = studentData[0];
+    // console.log(`Parent Contact for student ${roll_no}: ${student.parentContact}`);
+    
+    res.status(200).json({
+        parentno:student.parentno
+    });
     } catch (dbError) {
         console.error('Database query failed:', dbError);
         res.status(500).send('Database query failed.');

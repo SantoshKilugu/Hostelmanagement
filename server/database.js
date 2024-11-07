@@ -3,11 +3,11 @@ import mysql from 'mysql2/promise'; // Import MySQL library
 
 
 const dbconnect = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  port:'3308',
-  password: 'root',
-  database: 'fingerprint',
+  host: '103.21.58.5',
+  user: 'stepcone2024',
+  port:'3306',
+  password: 'Curie@1867',
+  database: 'stepcone',
   timezone: 'utc',
   dateStrings: true,
   waitForConnections: true,
