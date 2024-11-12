@@ -10,12 +10,17 @@ import StudentDetails from './components/StudentDetails';
 import Checkingate from './components/Checkingate';
 import Outpass from './components/Outpass';
 import Checkinout from './components/Checkinout';
+import Dashboard from './components/Dashboard';
 import PrivateRoute from './PrivateRoute';
 import Login from './components/Login';
 import Home from './components/Home';
 import { FaUserCircle } from 'react-icons/fa';
 import './App.css';  // Import the App styles
 import AdminOutpass from './components/AdminOutpass';
+import AllStudents from './components/AllStudents';
+import Present from './components/Present';
+import NotReturned from './components/NotReturned';
+import AllPasses from './components/AllPasses';
 
 function App() {
   const [username, setUsername] = useState('');
@@ -155,7 +160,106 @@ function App() {
               </PrivateRoute>
             } 
           />
-
+           <Route 
+            path="/dashboard" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                {/* <div className="fullscreen-bg"></div>  */}
+                <div className="overlay1"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <Dashboard/>
+                </div>
+              </PrivateRoute>
+            } 
+          />
+           <Route 
+            path="/getStudents" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                {/* <div className="fullscreen-bg"></div>  */}
+                <div className="overlay1"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <AllStudents/>
+                </div>
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/present" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                {/* <div className="fullscreen-bg"></div>  */}
+                <div className="overlay1"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <Present/>
+                </div>
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/notpresent" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                {/* <div className="fullscreen-bg"></div>  */}
+                <div className="overlay1"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <NotReturned/>
+                </div>
+              </PrivateRoute>
+            } 
+          />
+<Route 
+            path="/passes" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                {/* <div className="fullscreen-bg"></div>  */}
+                <div className="overlay1"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <AllPasses/>
+                </div>
+              </PrivateRoute>
+            } 
+          />
 <Route 
             path="/registration/updateUser" 
             element={

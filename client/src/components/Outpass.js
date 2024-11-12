@@ -45,34 +45,7 @@ const Outpass = () => {
   };
 
   // Function to update gate pass with current date and time
-  const updateGatepass = async (rollNo,parentno) => {
-    try {
-      const response = await fetch(`http://localhost:3300/update-outpass-guard`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ roll_no: rollNo }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        
-        setError(data.message);
-        console.error('Error updating out pass:', data.message);
-      } else {
-        sendSMS(parentno);
-        console.log('Gate pass updated successfully.');
-        setExpectedOutTime(data.expectedOutTime);
-        // Send a WhatsApp message to the parent
-        // await sendWhatsAppMessage(parentWhatsAppNumber, 'The MSG SENT successfully.');
-      }
-    } catch (err) {
-      console.error('Error:', err);
-    }
-  };
-  
-  
-
+ 
 //   app.post('/update-outpass', async (req, res) => {
 //     const { roll_no } = req.body;
 //     const currentDateTime = new Date();
@@ -165,7 +138,34 @@ const Outpass = () => {
     }
 };
 
- 
+const updateGatepass = async (rollNo,parentno) => {
+  try {
+    const response = await fetch(`http://localhost:3300/update-outpass-guard`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ roll_no: rollNo }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      
+      setError(data.message);
+      console.error('Error updating out pass:', data.message);
+    } else {
+      sendSMS(parentno);
+      console.log('Gate pass updated successfully.');
+      setExpectedOutTime(data.expectedOutTime);
+      // Send a WhatsApp message to the parent
+      // await sendWhatsAppMessage(parentWhatsAppNumber, 'The MSG SENT successfully.');
+    }
+  } catch (err) {
+    console.error('Error:', err);
+  }
+};
+
+
+
 
   const handleVerifyFingerprint = async () => {
     setUserData(null);

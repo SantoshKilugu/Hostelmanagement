@@ -1079,7 +1079,16 @@ app.get('/get-student-details/:roll_no', async (req, res) => {
     }
 });
 
-
+app.get('/getAllStudents', async (req, res) => {
+    try {
+        const query = `SELECT studentId, sname, syear, branch, hostelblock, roomno, parentno FROM users `;
+      const [students] = await dbconnect.execute(query);
+      res.status(200).json(students);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+      res.status(500).send({ message: 'Failed to retrieve student data' });
+    }
+  });
 
 // REPORT routes
 
@@ -1246,6 +1255,555 @@ app.get('/current-gatepass-report-filtered', async (req, res) => {
     } catch (error) {
         console.error('Error fetching current gatepass report:', error);
         res.status(500).send({ error: 'Failed to fetch current gatepass report' });
+    }
+});
+
+app.get('/dashboard-data', async (req, res) => {
+    try {
+      const queries = {
+        totalStudents: `
+          SELECT COUNT(*) AS totalStudents
+          FROM users
+        `,
+        totalGirls: `
+          SELECT COUNT(*) AS totalGirls
+          FROM users
+          WHERE gender = 'Female'
+        `,
+        totalBoys: `
+          SELECT COUNT(*) AS totalBoys
+          FROM users
+          WHERE gender = 'Male'
+        `,
+        totalPasses: `
+          SELECT (SELECT COUNT(*) FROM Gatepass) + (SELECT COUNT(*) FROM Outpass) AS totalPasses
+        `,
+        pinkPass: `
+          SELECT COUNT(*) AS pinkpass
+          FROM Gatepass
+          WHERE outTime IS NOT NULL
+        `,
+        outPass: `
+        SELECT COUNT(*) AS outpass
+        FROM Outpass
+        WHERE outTime IS NOT NULL
+      `,
+        present: `
+          SELECT COUNT(DISTINCT u.studentId) AS present
+          FROM users u
+          LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+          LEFT JOIN Outpass o ON u.studentId = o.roll_no
+          WHERE 
+            NOT EXISTS (
+              SELECT 1
+              FROM Gatepass g2
+              WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            AND NOT EXISTS (
+              SELECT 1
+              FROM Outpass o2
+              WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+            )
+        `,
+        presentGirls: `
+          SELECT COUNT(DISTINCT u.studentId) AS presentgirls
+          FROM users u
+          LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+          LEFT JOIN Outpass o ON u.studentId = o.roll_no
+          WHERE u.gender = 'Female'
+            AND NOT EXISTS (
+              SELECT 1
+              FROM Gatepass g2
+              WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            AND NOT EXISTS (
+              SELECT 1
+              FROM Outpass o2
+              WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+            )
+        `,
+        presentBoys: `
+          SELECT COUNT(DISTINCT u.studentId) AS presentboys
+          FROM users u
+          LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+          LEFT JOIN Outpass o ON u.studentId = o.roll_no
+          WHERE u.gender = 'Male'
+            AND NOT EXISTS (
+              SELECT 1
+              FROM Gatepass g2
+              WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            AND NOT EXISTS (
+              SELECT 1
+              FROM Outpass o2
+              WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+            )
+        `,
+        notRet: `
+          SELECT COUNT(DISTINCT u.studentId) AS notret
+          FROM users u
+          LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+          LEFT JOIN Outpass o ON u.studentId = o.roll_no
+          WHERE 
+            EXISTS (
+              SELECT 1
+              FROM Gatepass g2
+              WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM Outpass o2
+              WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+            )
+        `,
+        notRetGirls: `
+          SELECT COUNT(DISTINCT u.studentId) AS notretgirls
+          FROM users u
+          LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+          LEFT JOIN Outpass o ON u.studentId = o.roll_no
+          WHERE u.gender = 'Female' AND
+            (EXISTS (
+              SELECT 1
+              FROM Gatepass g2
+              WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM Outpass o2
+              WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+      ))
+        `,
+        notRetBoys: `
+          SELECT COUNT(DISTINCT u.studentId) AS notretboys
+          FROM users u
+          LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+          LEFT JOIN Outpass o ON u.studentId = o.roll_no
+          WHERE u.gender = 'Male' AND
+            (EXISTS (
+              SELECT 1
+              FROM Gatepass g2
+              WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM Outpass o2
+              WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+      ))
+        `,
+        
+      };
+      const results = await Promise.all(
+        Object.keys(queries).map(async (key) => {
+          const [rows] = await dbconnect.execute(queries[key]);
+          return { [key]: rows[0][Object.keys(rows[0])[0]] };
+        })
+      );
+  
+      const data = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      res.status(500).json({ error: 'Failed to fetch dashboard data' });
+    }
+  });
+  
+
+app.get('/students-filtered', async (req, res) => {
+    const { gender, blockName } = req.query;
+    
+    let query = `
+        SELECT 
+            sname,
+            studentId,
+            syear,
+            branch,
+            hostelblock,
+            roomno,
+            parentno
+        FROM 
+            users 
+        WHERE 
+            1 = 1
+    `;
+    let params = [];
+
+    // Add conditions based on provided filters
+    if (gender && gender !== 'all') {
+        query += ' AND gender = ?';
+        params.push(gender);
+    }
+
+    if (blockName && blockName !== 'all') {
+        query += ' AND hostelblock = ?';
+        params.push(blockName);
+    }
+
+    try {
+        const [rows] = await dbconnect.execute(query, params);
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching filtered students data:', error);
+        res.status(500).send({ error: 'Failed to fetch filtered students data' });
+    }
+});
+
+app.get('/students-filtered-by-id', async (req, res) => {
+    const { id } = req.query;
+    let query;
+    let params = [];
+
+    if (id) {
+        query = `
+            SELECT sname, studentId, syear, branch, hostelblock, roomno, parentno
+            FROM users
+            WHERE studentId LIKE ?;
+        `;
+        params.push(`%${id}%`);
+    } else {
+        query = `
+            SELECT sname, studentId, syear, branch, hostelblock, roomno, parentno
+            FROM users;
+        `;
+    }
+
+    try {
+        const [rows] = await dbconnect.execute(query, params);
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).send({ error: 'Failed to fetch students' });
+    }
+});
+app.get('/present-students', async (req, res) => {
+    try {
+      const query = `
+       SELECT DISTINCT u.sname, u.studentId, u.syear, u.branch, u.hostelblock, u.roomno, u.parentno
+FROM users u
+LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+LEFT JOIN Outpass o ON u.studentId = o.roll_no
+WHERE 
+   
+    NOT EXISTS (
+        SELECT 1
+        FROM Gatepass g2
+        WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+    )
+   
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Outpass o2
+        WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+    );
+
+
+      `;
+      
+      const [students] = await dbconnect.execute(query);
+      res.json(students);
+    } catch (error) {
+      console.error('Error fetching present students:', error);
+      res.status(500).json({ error: 'Failed to fetch present students' });
+    }
+  });
+  
+  app.get('/present-student-filtered', async (req, res) => {
+    const { gender, blockName } = req.query;
+    
+    let query = `
+        SELECT DISTINCT u.sname, u.studentId, u.syear, u.branch, u.hostelblock, u.roomno, u.parentno
+        FROM users u
+        LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+        LEFT JOIN Outpass o ON u.studentId = o.roll_no
+        WHERE 
+            -- Only include students where all their Gatepass records have both outTime and inTime set
+            NOT EXISTS (
+                SELECT 1
+                FROM Gatepass g2
+                WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            -- Only include students where all their Outpass records have both outTime and inTime set
+            AND NOT EXISTS (
+                SELECT 1
+                FROM Outpass o2
+                WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+            )
+    `;
+
+    let params = [];
+
+    // Add conditions based on provided filters
+    if (gender && gender !== 'all') {
+        query += ' AND u.gender = ?';
+        params.push(gender);
+    }
+
+    if (blockName && blockName !== 'all') {
+        query += ' AND u.hostelblock = ?';
+        params.push(blockName);
+    }
+
+    try {
+        const [students] = await dbconnect.execute(query, params);
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching filtered present students:', error);
+        res.status(500).send({ error: 'Failed to fetch filtered present students' });
+    }
+});
+
+app.get('/present-student-filtered-by-id', async (req, res) => {
+    const { id } = req.query;
+    let query = `
+        SELECT DISTINCT u.sname, u.studentId, u.syear, u.branch, u.hostelblock, u.roomno, u.parentno
+        FROM users u
+        LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+        LEFT JOIN Outpass o ON u.studentId = o.roll_no
+        WHERE 
+            -- Only include students where all their Gatepass records have both outTime and inTime set
+            NOT EXISTS (
+                SELECT 1
+                FROM Gatepass g2
+                WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            -- Only include students where all their Outpass records have both outTime and inTime set
+            AND NOT EXISTS (
+                SELECT 1
+                FROM Outpass o2
+                WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+            )
+    `;
+
+    let params = [];
+
+    // If an ID is provided, filter by that ID
+    if (id) {
+        query += ' AND u.studentId LIKE ?';
+        params.push(`%${id}%`);
+    }
+
+    try {
+        const [students] = await dbconnect.execute(query, params);
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching filtered present students by ID:', error);
+        res.status(500).send({ error: 'Failed to fetch filtered present students by ID' });
+    }
+});
+
+// Route to get all students who are not present in the hostel
+app.get('/not-present-students', async (req, res) => {
+    try {
+        const query = `
+            SELECT DISTINCT u.sname, u.studentId, u.syear, u.branch, u.hostelblock, u.roomno, u.parentno
+            FROM users u
+            LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+            LEFT JOIN Outpass o ON u.studentId = o.roll_no
+            WHERE 
+                -- Check for Gatepass records with outTime but no inTime
+                EXISTS (
+                    SELECT 1
+                    FROM Gatepass g2
+                    WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+                )
+                -- Check for Outpass records with outTime but no inTime
+                OR EXISTS (
+                    SELECT 1
+                    FROM Outpass o2
+                    WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+                );
+        `;
+
+        const [students] = await dbconnect.execute(query);
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching not-present students:', error);
+        res.status(500).json({ error: 'Failed to fetch not-present students' });
+    }
+});
+
+// Route to get filtered not-present students based on gender and blockName
+app.get('/not-present-student-filtered', async (req, res) => {
+    const { gender, blockName } = req.query;
+    
+    let query = `
+        SELECT DISTINCT u.sname, u.studentId, u.syear, u.branch, u.hostelblock, u.roomno, u.parentno
+        FROM users u
+        LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+        LEFT JOIN Outpass o ON u.studentId = o.roll_no
+        WHERE 
+            -- Check for Gatepass records with outTime but no inTime
+            EXISTS (
+                SELECT 1
+                FROM Gatepass g2
+                WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            -- Check for Outpass records with outTime but no inTime
+            OR EXISTS (
+                SELECT 1
+                FROM Outpass o2
+                WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+            )
+    `;
+
+    let params = [];
+
+    // Add conditions based on provided filters
+    if (gender && gender !== 'all') {
+        query += ' AND u.gender = ?';
+        params.push(gender);
+    }
+
+    if (blockName && blockName !== 'all') {
+        query += ' AND u.hostelblock = ?';
+        params.push(blockName);
+    }
+
+    try {
+        const [students] = await dbconnect.execute(query, params);
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching filtered not-present students:', error);
+        res.status(500).send({ error: 'Failed to fetch filtered not-present students' });
+    }
+});
+
+// Route to get filtered not-present students by studentId
+app.get('/not-present-student-filtered-by-id', async (req, res) => {
+    const { id } = req.query;
+    let query = `
+        SELECT DISTINCT u.sname, u.studentId, u.syear, u.branch, u.hostelblock, u.roomno, u.parentno
+        FROM users u
+        LEFT JOIN Gatepass g ON u.studentId = g.roll_no
+        LEFT JOIN Outpass o ON u.studentId = o.roll_no
+        WHERE 
+            -- Check for Gatepass records with outTime but no inTime
+            EXISTS (
+                SELECT 1
+                FROM Gatepass g2
+                WHERE g2.roll_no = u.studentId AND g2.outTime IS NOT NULL AND g2.inTime IS NULL
+            )
+            -- Check for Outpass records with outTime but no inTime
+            OR EXISTS (
+                SELECT 1
+                FROM Outpass o2
+                WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
+            )
+    `;
+
+    let params = [];
+
+    // If an ID is provided, filter by that ID
+    if (id) {
+        query += ' AND u.studentId LIKE ?';
+        params.push(`%${id}%`);
+    }
+
+    try {
+        const [students] = await dbconnect.execute(query, params);
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching filtered not-present students by ID:', error);
+        res.status(500).send({ error: 'Failed to fetch filtered not-present students by ID' });
+    }
+});
+
+app.get('/all-passes', async (req, res) => {
+    try {
+      const query = `
+        SELECT 
+        distinct
+          u.sname, 
+          u.studentId, 
+          u.syear, 
+          u.branch, 
+          u.hostelblock, 
+          u.roomno, 
+          u.parentno, 
+          COUNT(g.roll_no) AS gatepassCount, 
+          COUNT(o.roll_no) AS outpassCount
+        FROM users u
+        LEFT JOIN Gatepass g ON u.studentId = g.roll_no AND g.outTime IS NOT NULL 
+        LEFT JOIN Outpass o ON u.studentId = o.roll_no AND o.outTime IS NOT NULL 
+        GROUP BY u.studentId
+      `;
+      
+      const [students] = await dbconnect.execute(query);
+      res.json(students);
+    } catch (error) {
+      console.error('Error fetching all passes data:', error);
+      res.status(500).json({ error: 'Failed to fetch all passes data' });
+    }
+  });
+
+  app.get('/passes-filtered', async (req, res) => {
+    const { gender, blockName } = req.query;
+
+    let query = `
+        SELECT 
+            distinct
+            u.sname, 
+            u.studentId, 
+            u.syear, 
+            u.branch, 
+            u.hostelblock, 
+            u.roomno, 
+            u.parentno, 
+            COUNT(g.roll_no) AS gatepassCount, 
+            COUNT(o.roll_no) AS outpassCount
+        FROM users u
+        LEFT JOIN Gatepass g ON u.studentId = g.roll_no AND g.outTime IS NOT NULL
+        LEFT JOIN Outpass o ON u.studentId = o.roll_no AND o.outTime IS NOT NULL
+        WHERE 1=1
+    `;
+
+    // Add filters based on query parameters
+    if (gender && gender !== 'all') {
+        query += ` AND u.gender = '${gender}'`;
+    }
+
+    if (blockName && blockName !== 'all') {
+        query += ` AND u.hostelblock = '${blockName}'`;
+    }
+
+    query += ' GROUP BY u.studentId';
+
+    try {
+        const [students] = await dbconnect.execute(query);
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching filtered passes data:', error);
+        res.status(500).json({ error: 'Failed to fetch filtered passes data' });
+    }
+});
+
+app.get('/passes-filtered-by-id', async (req, res) => {
+    const { id } = req.query;
+
+    let query = `
+        SELECT 
+            distinct
+            u.sname, 
+            u.studentId, 
+            u.syear, 
+            u.branch, 
+            u.hostelblock, 
+            u.roomno, 
+            u.parentno, 
+            COUNT(g.roll_no) AS gatepassCount, 
+            COUNT(o.roll_no) AS outpassCount
+        FROM users u
+        LEFT JOIN Gatepass g ON u.studentId = g.roll_no AND g.outTime IS NOT NULL
+        LEFT JOIN Outpass o ON u.studentId = o.roll_no AND o.outTime IS NOT NULL
+        WHERE u.studentId LIKE ?
+        GROUP BY u.studentId
+    `;
+
+    try {
+        const [students] = await dbconnect.execute(query, [`%${id}%`]);
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching passes filtered by ID:', error);
+        res.status(500).json({ error: 'Failed to fetch passes filtered by ID' });
     }
 });
 

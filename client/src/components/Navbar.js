@@ -49,6 +49,18 @@ const Navbar = ({ username }) => {
 
 
           )}
+           {username === 'admin' && (
+            <li className="dropdown">
+              <Link to="/dashboard">
+                <span className='flex items-center'>Dashboard</span>
+              </Link>
+              
+            </li>
+
+            
+
+
+          )}
   {/* admin checkout */}
 {username === 'admin' && (
 <li className="dropdown">
