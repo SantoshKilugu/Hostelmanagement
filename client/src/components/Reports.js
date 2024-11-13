@@ -108,10 +108,18 @@ function Reports() {
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = gatepassData.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(gatepassData.length / rowsPerPage);
+    if (loading) {
+        return (
+          <div className="flex justify-center items-center h-screen">
+            <div className="spinner border-t-4 border-gray-800 rounded-full w-16 h-16 animate-spin"></div>
+          </div>
+        );
+    
+      }
 
     return (
         <div>
-            <h1 className="text-center font-bold text-white text-gray-800 mb-4 mt-4">Current Report</h1>
+            <h1 className="text-center font-bold  text-gray-800 mb-4 mt-4">Current Report</h1>
             <div className="flex justify-center mb-4 ml-56 mr-56">
                 <input
                     type="date"
@@ -150,20 +158,20 @@ function Reports() {
             {loading ? (
                 <p>Loading...</p>
             ) : (
-                <table className='bg-black text-white bg-opacity-5'>
+                <table className=' text-gray-900 text-center '>
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Roll No</th>
-                            <th>Year</th>
-                            <th>Branch</th>
-                            <th>Hostel Block Name</th>
-                            <th>Room No</th>
-                            <th>Parent No</th>
-                            <th>Out Time</th>
-                            <th>In Time</th>
-                            <th>Date</th>
-                            <th>Fine</th>
+                            <th className='text-center'>Name</th>
+                            <th className='text-center'>Roll No</th>
+                            <th className='text-center'>Year</th>
+                            <th className='text-center'>Branch</th>
+                            <th className='text-center'>Hostel Block Name</th>
+                            <th className='text-center'>Room No</th>
+                            <th className='text-center'>Parent No</th>
+                            <th className='text-center'>Out Time</th>
+                            <th className='text-center'>In Time</th>
+                            <th className='text-center'>Date</th>
+                           
                         </tr>
                     </thead>
                     <tbody>
@@ -179,7 +187,7 @@ function Reports() {
                                 <td>{row.outTime}</td>
                                 <td>{row.inTime}</td>
                                 <td>{row.date}</td>
-                                <td>{row.fine}</td>
+                               
                             </tr>
                         ))}
                     </tbody>
@@ -189,15 +197,15 @@ function Reports() {
                 <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(currentPage - 1)}
-                    className={`text-white font-bold py-2 px-3 rounded shadow-md  transition duration-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`text-gray font-bold py-2 px-3 rounded shadow-md  transition duration-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <FontAwesomeIcon icon={faArrowLeft} />
                 </button>
-                <span className='text-white'>Page {currentPage} of {totalPages}</span>
+                <span className='text-gray'>Page {currentPage} of {totalPages}</span>
                 <button
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    className={`text-white font-bold py-2 px-3 rounded shadow-md  transition duration-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`text-gray font-bold py-2 px-3 rounded shadow-md  transition duration-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <FontAwesomeIcon icon={faArrowRight} />
                 </button>
@@ -211,7 +219,7 @@ function Reports() {
                         type="time" 
                         value={reportTime}
                         onChange={(e) => setReportTime(e.target.value)}
-                        className="mr-2 w-30 bg-transparent outline-none text-white"
+                        className="mr-2 w-30 bg-transparent outline-none text-gray"
                     />
                     <button className="bg-gray-800 text-white font-bold py-2 px-4 mr-3 rounded shadow-md hover:bg-gray-600 transition duration-200" onClick={handleSaveTime}>
                         Save time to send report

@@ -7,11 +7,13 @@ const Registration = ({ type }) => {
     const [formData, setFormData] = useState({
         name: '',
         roll_no: '',
+       
         year: '',
         branch: '',
         hostel_block_name: '',
         room_no: '',
-        parent_no: ''
+        parent_no: '',
+        gender:''
     });
     const [isRegistered, setIsRegistered] = useState(false);
     const [userData, setUserData] = useState(null);
@@ -73,11 +75,13 @@ const Registration = ({ type }) => {
             setFormData({
                 name: '',
                 roll_no: '',
+               
                 year: '',
                 branch: '',
                 hostel_block_name: '',
                 room_no: '',
-                parent_no: ''
+                parent_no: '',
+                gender:''
             });
             setIsRegistered(true);
         } catch (error) {
@@ -113,6 +117,7 @@ const Registration = ({ type }) => {
             setFormData({
               name: user.sname,
               roll_no: user.studentId,
+              gender:user.gender,
               year: user.syear,
               branch: user.branch,
               hostel_block_name: user.hostelblock,
@@ -146,7 +151,8 @@ const Registration = ({ type }) => {
             branch: '',
             hostel_block_name: '',
             room_no: '',
-            parent_no: ''
+            parent_no: '',
+            gender:''
           });
         } catch (error) {
           console.error('Error updating user:', error);
@@ -283,61 +289,100 @@ const Registration = ({ type }) => {
     >
       Roll No
     </label>
-  </div>
-
-              <div className="relative z-0 w-full mb-5 group">
-    <input
-      type="number"
-      name="year"
-      value={formData.year}
-      onChange={handleChange}
-      className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
-      placeholder=" "
-      required
-    />
-    <label
-      htmlFor="year"
-      className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-    >
-      Year
-    </label>
-  </div>
+    </div>
+    <div className="relative z-0 w-full mb-5 group">
+  <select
+    name="gender"
+    value={formData.gender}
+    onChange={handleChange}
+    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
+    required
+  >
+    <option value="" disabled hidden></option>
+    <option value="1" className='opt'>Male</option>
+    <option value="2" className='opt'>Female</option>
+    <option value="3" className='opt'>Others</option>
+  </select>
+  <label
+    htmlFor="gender"
+    className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+  >
+    Gender
+  </label>
+</div>
+  <div className="relative z-0 w-full mb-5 group">
+  <select
+    name="year"
+    value={formData.year}
+    onChange={handleChange}
+    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
+    required
+  >
+    <option value="" disabled hidden></option>
+    <option value="1" className='opt'>1st Year</option>
+    <option value="2" className='opt'>2nd Year</option>
+    <option value="3" className='opt'>3rd Year</option>
+    <option value="4" className='opt'>4th Year</option>
+  
+  </select>
+  <label
+    htmlFor="year"
+    className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+  >
+    Year
+  </label>
+</div>
 
   <div className="relative z-0 w-full mb-5 group">
-    <input
-      type="text"
-      name="branch"
-      value={formData.branch}
-      onChange={handleChange}
-      className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
-      placeholder=" "
-      required
-    />
-    <label
-      htmlFor="branch"
-      className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-    >
-      Branch
-    </label>
-  </div>
+  <select
+    name="branch"
+    value={formData.branch}
+    onChange={handleChange}
+    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
+    required
+  >
+    <option value="" disabled hidden></option>
+    <option value="CSE" className='opt'>CSE</option>
+    <option value="ECE" className='opt'>ECE</option>
+    <option value="IT" className='opt'>IT</option>
+    <option value="MECH" className='opt'>MECH</option>
+    <option value="CIVIL" className='opt'>CIVIL</option>
+    <option value="CHEM" className='opt'>CHEM</option>
+    <option value="EEE" className='opt'>EEE</option>
+  </select>
+  <label
+    htmlFor="branch"
+    className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+  >
+    Branch
+  </label>
+</div>
 
-  <div className="relative z-0 w-full mb-5 group">
-    <input
-      type="text"
-      name="hostel_block_name"
-      value={formData.hostel_block_name}
-      onChange={handleChange}
-      className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
-      placeholder=" "
-      required
-    />
-    <label
-      htmlFor="hostel_block_name"
-      className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-    >
-      Hostel Block Name
-    </label>
-  </div>
+<div className="relative z-0 w-full mb-5 group">
+  <select
+    name="hostel_block_name"
+    value={formData.hostel_block_name}
+    onChange={handleChange}
+    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
+    required
+  >
+    <option value="" disabled hidden></option>
+    <option value="Satpura" className='opt ml-5'>SATPURA</option>
+    <option value="Himalaya" className='opt'>HIMALAYA</option>
+    <option value="Aravali" className='opt'>ARAVALI</option>
+    <option value="Nilagiri" className='opt'>NILAGIRI</option>
+    <option value="Vindhya" className='opt'>VINDHYA</option>
+    <option value="Vamsadhara" className='opt'>VAMSADHARA</option>
+    <option value="Nagavali" className='opt'>NAGAVALI</option>
+  </select>
+  <label
+    htmlFor="hostel_block_name"
+    className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+  >
+    Hostel Block Name
+  </label>
+</div>
+
 
   <div className="relative z-0 w-full mb-5 group">
     <input
@@ -428,60 +473,98 @@ const Registration = ({ type }) => {
       Roll No
     </label>
   </div>
+  <div className="relative z-0 w-full mb-5 group">
+  <select
+    name="gender"
+    value={formData.gender}
+    onChange={handleChange}
+    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
+    required
+  >
+    <option value="" disabled hidden></option>
+    <option value="1" className='opt'>Male</option>
+    <option value="2" className='opt'>Female</option>
+    <option value="3" className='opt'>Others</option>
+  </select>
+  <label
+    htmlFor="gender"
+    className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+  >
+    Gender
+  </label>
+</div>
+  <div className="relative z-0 w-full mb-5 group">
+  <select
+    name="year"
+    value={formData.year}
+    onChange={handleChange}
+    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
+    required
+  >
+    <option value="" disabled hidden></option>
+    <option value="1" className='opt'>1st Year</option>
+    <option value="2" className='opt'>2nd Year</option>
+    <option value="3" className='opt'>3rd Year</option>
+    <option value="4" className='opt'>4th Year</option>
+  
+  </select>
+  <label
+    htmlFor="year"
+    className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+  >
+    Year
+  </label>
+</div>
 
   <div className="relative z-0 w-full mb-5 group">
-    <input
-      type="number"
-      name="year"
-      value={formData.year}
-      onChange={handleChange}
-      className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
-      placeholder=" "
-      required
-    />
-    <label
-      htmlFor="year"
-      className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-    >
-      Year
-    </label>
-  </div>
+  <select
+    name="branch"
+    value={formData.branch}
+    onChange={handleChange}
+    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
+    required
+  >
+    <option value="" disabled hidden></option>
+    <option value="CSE" className='opt'>CSE</option>
+    <option value="ECE" className='opt'>ECE</option>
+    <option value="IT" className='opt'>IT</option>
+    <option value="MECH" className='opt'>MECH</option>
+    <option value="CIVIL" className='opt'>CIVIL</option>
+    <option value="CHEM" className='opt'>CHEM</option>
+    <option value="EEE" className='opt'>EEE</option>
+  </select>
+  <label
+    htmlFor="branch"
+    className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+  >
+    Branch
+  </label>
+</div>
 
-  <div className="relative z-0 w-full mb-5 group">
-    <input
-      type="text"
-      name="branch"
-      value={formData.branch}
-      onChange={handleChange}
-      className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
-      placeholder=" "
-      required
-    />
-    <label
-      htmlFor="branch"
-      className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-    >
-      Branch
-    </label>
-  </div>
-
-  <div className="relative z-0 w-full mb-5 group">
-    <input
-      type="text"
-      name="hostel_block_name"
-      value={formData.hostel_block_name}
-      onChange={handleChange}
-      className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
-      placeholder=" "
-      required
-    />
-    <label
-      htmlFor="hostel_block_name"
-      className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-    >
-      Hostel Block Name
-    </label>
-  </div>
+<div className="relative z-0 w-full mb-5 group">
+  <select
+    name="hostel_block_name"
+    value={formData.hostel_block_name}
+    onChange={handleChange}
+    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-500 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-gray-500 focus:outline-none focus:ring-0 focus:border-gray-600 peer"
+    required
+  >
+    <option value="" disabled hidden></option>
+    <option value="Satpura" className='opt ml-5'>SATPURA</option>
+    <option value="Himalaya" className='opt'>HIMALAYA</option>
+    <option value="Aravali" className='opt'>ARAVALI</option>
+    <option value="Nilagiri" className='opt'>NILAGIRI</option>
+    <option value="Vindhya" className='opt'>VINDHYA</option>
+    <option value="Vamsadhara" className='opt'>VAMSADHARA</option>
+    <option value="Nagavali" className='opt'>NAGAVALI</option>
+  </select>
+  <label
+    htmlFor="hostel_block_name"
+    className="peer-focus:font-medium absolute text-sm text-gray-800 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-gray-600 peer-focus:dark:text-gray-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+  >
+    Hostel Block Name
+  </label>
+</div>
 
   <div className="relative z-0 w-full mb-5 group">
     <input

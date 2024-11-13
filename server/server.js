@@ -52,12 +52,12 @@ if (!fs.existsSync(uploadDir)) {
 
 // Registration Endpoint
 app.post('/register', async (req, res) => {
-    const { name, roll_no, year, branch, hostel_block_name, room_no, parent_no } = req.body;
+    const { name, roll_no, year, branch, hostel_block_name, room_no, parent_no,gender } = req.body;
 
     try {
-        const query = ` INSERT INTO users ( studentId,sname,syear, branch, hostelblock,  roomno,parentno) VALUES (?, ?, ?, ?, ?, ?, ?) `;
+        const query = ` INSERT INTO users ( studentId,sname,syear, branch, hostelblock,  roomno,parentno,gender) VALUES (?, ?, ?, ?, ?, ?, ?,?) `;
 
-        const values = [roll_no,name,  year, branch, hostel_block_name, room_no, parent_no|| null];
+        const values = [roll_no,name,  year, branch, hostel_block_name, room_no, parent_no,gender|| null];
 
         await dbconnect.execute(query, values);
         res.status(201).send({ message: 'Registration details inserted successfully!' });
@@ -87,7 +87,7 @@ app.get('/verify-rollupdate/:roll_no', async (req, res) => {
   
   // Endpoint to update user data
   app.put('/update-user', async (req, res) => {
-    const { name, roll_no, year, branch, hostel_block_name, room_no, parent_no } = req.body;
+    const { name, roll_no, year, branch, hostel_block_name, room_no, parent_no,gender } = req.body;
   
     try {
       const query = `
@@ -97,10 +97,11 @@ app.get('/verify-rollupdate/:roll_no', async (req, res) => {
           branch = ?, 
           hostelblock = ?, 
           roomno = ?, 
-          parentno = ? 
+          parentno = ? ,
+          gender = ?
         WHERE studentId = ?
       `;
-      const [result] = await dbconnect.execute(query, [name, year, branch, hostel_block_name, room_no, parent_no, roll_no]);
+      const [result] = await dbconnect.execute(query, [name, year, branch, hostel_block_name, room_no, parent_no,gender, roll_no]);
   
       if (result.affectedRows > 0) {
         res.json({ message: 'User updated successfully.' });
@@ -945,10 +946,10 @@ app.post('/upload-excel', upload.single('excelFile'), async (req, res) => {
 
         // Insert data into the database
         for (const row of data) {
-            const { roll_no,name,  year, branch, hostel_block_name, room_no, parent_no,imageUrl } = row;
+            const { roll_no,name,  year, branch, hostel_block_name, room_no, parent_no,gender } = row;
 
-            const query = `INSERT INTO users (studentId,sname, syear, branch, hostelblock,  roomno,parentno,imageUrl) VALUES (?, ?, ?, ?, ?, ?, ?,?) `;
-            const values = [roll_no,name,  year, branch, hostel_block_name, room_no, parent_no,imageUrl || null];
+            const query = `INSERT INTO users (studentId,sname, syear, branch, hostelblock,  roomno,parentno,gender) VALUES (?, ?, ?, ?, ?, ?, ?,?) `;
+            const values = [roll_no,name,  year, branch, hostel_block_name, room_no, parent_no,gender || null];
 
             await dbconnect.execute(query, values);
         }
@@ -1004,7 +1005,7 @@ app.get('/get-student-details/:roll_no', async (req, res) => {
 
     try {
         // Fetch the student details
-        const studentQuery = `SELECT r.studentId, r.sname, r.syear, r.branch, r.hostelblock, r.roomno, r.parentno,r.imageUrl FROM users r WHERE r.studentId = ?`;
+        const studentQuery = `SELECT r.studentId, r.sname,r.gender, r.syear, r.branch, r.hostelblock, r.roomno, r.parentno,r.imageUrl FROM users r WHERE r.studentId = ?`;
         const [studentRows] = await dbconnect.execute(studentQuery, [rollNo]);
 
         if (studentRows.length > 0) {
@@ -1090,6 +1091,8 @@ app.get('/getAllStudents', async (req, res) => {
     }
   });
 
+
+  
 // REPORT routes
 
 
@@ -1259,6 +1262,9 @@ app.get('/current-gatepass-report-filtered', async (req, res) => {
 });
 
 app.get('/dashboard-data', async (req, res) => {
+    const { date } = req.query;  // Get date from query parameters
+  const formattedDate = date || 'CURDATE()';
+
     try {
       const queries = {
         totalStudents: `
@@ -1344,7 +1350,7 @@ app.get('/dashboard-data', async (req, res) => {
           FROM users u
           LEFT JOIN Gatepass g ON u.studentId = g.roll_no
           LEFT JOIN Outpass o ON u.studentId = o.roll_no
-          WHERE 
+          WHERE (
             EXISTS (
               SELECT 1
               FROM Gatepass g2
@@ -1354,7 +1360,7 @@ app.get('/dashboard-data', async (req, res) => {
               SELECT 1
               FROM Outpass o2
               WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
-            )
+            ))
         `,
         notRetGirls: `
           SELECT COUNT(DISTINCT u.studentId) AS notretgirls
@@ -1390,7 +1396,58 @@ app.get('/dashboard-data', async (req, res) => {
               WHERE o2.roll_no = u.studentId AND o2.outTime IS NOT NULL AND o2.inTime IS NULL
       ))
         `,
-        
+        todaysGatepassGirlsIssued: `
+          SELECT COUNT(*) AS todaysGatepassGirlsIssued FROM Gatepass g
+          JOIN users u ON g.roll_no = u.studentId
+          WHERE u.gender = 'Female' AND DATE(g.issueTime) = '${formattedDate}'
+        `,
+        todaysGatepassGirls: `
+          SELECT COUNT(*) AS todaysGatepassGirls FROM Gatepass g
+          JOIN users u ON g.roll_no = u.studentId
+          WHERE u.gender = 'Female' AND DATE(g.outTime) = '${formattedDate}'
+        `,
+        todaysOutpassBoys: `
+        SELECT COUNT(*) AS todaysOutpassBoys FROM Outpass g
+        JOIN users u ON g.roll_no = u.studentId
+        WHERE u.gender = 'Male' AND DATE(g.outTime) = '${formattedDate}'
+      `,
+      todaysGatepassBoysIssued: `
+      SELECT COUNT(*) AS todaysGatepassBoysIssued FROM Gatepass g
+      JOIN users u ON g.roll_no = u.studentId
+      WHERE u.gender = 'Male' AND DATE(g.issueTime) = '${formattedDate}'
+    `,
+      todaysGatepassBoys: `
+      SELECT COUNT(*) AS todaysGatepassBoys FROM Gatepass g
+      JOIN users u ON g.roll_no = u.studentId
+      WHERE u.gender = 'Male' AND DATE(g.outTime) = '${formattedDate}'
+    `,
+  todaysInTimeGirls: `
+         SELECT COUNT(*) AS todaysGatepassGirlsIntime FROM Gatepass g
+    JOIN users u ON g.roll_no = u.studentId
+    WHERE u.gender = 'Female' AND DATE(g.inTime) = '${formattedDate}'
+        `,
+        todaysOutTimeBoys: `
+        SELECT COUNT(*) AS todaysOutTimeBoys FROM (
+          SELECT g.roll_no FROM Gatepass g
+          JOIN users u ON g.roll_no = u.studentId
+          WHERE u.gender = 'Male' AND DATE(g.outTime) = '${formattedDate}'
+          UNION ALL
+          SELECT o.roll_no FROM Outpass o
+          JOIN users u ON o.roll_no = u.studentId
+          WHERE u.gender = 'Male' AND DATE(o.outTime) = '${formattedDate}' 
+        ) AS combined
+      `,
+      todaysInTimeBoys: `
+        SELECT COUNT(*) AS todaysInTimeBoys FROM (
+          SELECT g.roll_no FROM Gatepass g
+          JOIN users u ON g.roll_no = u.studentId
+          WHERE u.gender = 'Male' AND DATE(g.inTime) = '${formattedDate}'
+          UNION ALL
+          SELECT o.roll_no FROM Outpass o
+          JOIN users u ON o.roll_no = u.studentId
+          WHERE u.gender = 'Male' AND DATE(o.inTime) = '${formattedDate}'
+        ) AS combined
+      `
       };
       const results = await Promise.all(
         Object.keys(queries).map(async (key) => {
@@ -1444,6 +1501,174 @@ app.get('/students-filtered', async (req, res) => {
     } catch (error) {
         console.error('Error fetching filtered students data:', error);
         res.status(500).send({ error: 'Failed to fetch filtered students data' });
+    }
+});
+//in studentprofile
+
+app.get('/get-student-details-profile/:roll_no', async (req, res) => {
+    const rollNo = req.params.roll_no;
+
+    try {
+        // Fetch the student details
+        const studentQuery = `SELECT r.studentId, r.sname,r.gender, r.syear, r.branch, r.hostelblock, r.roomno, r.parentno,r.imageUrl FROM users r WHERE r.studentId = ?`;
+        const [studentRows] = await dbconnect.execute(studentQuery, [rollNo]);
+
+        if (studentRows.length > 0) {
+            // Fetch the Gatepass and Outpass details (date, outTime, inTime)
+            const gatepassQuery = `
+                SELECT g.date, g.outTime, g.inTime FROM Gatepass g WHERE g.roll_no = ?`;
+            const outpassQuery = `
+                SELECT g.date, g.outTime, g.inTime FROM Outpass g WHERE g.roll_no = ?`;
+
+            const [gatepassRows] = await dbconnect.execute(gatepassQuery, [rollNo]);
+            const [outpassRows] = await dbconnect.execute(outpassQuery, [rollNo]);
+
+            // Combine the passes and add type
+            const passes = [
+                ...gatepassRows.map(pass => ({ ...pass, type: 'Gatepass' })),
+                ...outpassRows.map(pass => ({ ...pass, type: 'Outpass' }))
+            ];
+
+            // Fetch the image URL associated with the student
+            const imageQuery = `SELECT imageUrl FROM images WHERE studentId = ?`;
+            const [imageRows] = await dbconnect.execute(imageQuery, [rollNo]);
+
+            // Get the current year and month
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1; // getMonth() returns 0 for January
+
+            // Count the number of entries in the Gatepass table for the user for the current month
+            const countQuery = `
+                SELECT COUNT(*) as count 
+                FROM Gatepass 
+                WHERE roll_no = ? 
+                  AND YEAR(date) = ? 
+                  AND MONTH(date) = ?`;
+            const countoutQuery = `
+                SELECT COUNT(*) as count 
+                FROM Outpass 
+                WHERE roll_no = ? 
+                  AND YEAR(date) = ? 
+                  AND MONTH(date) = ?`;
+            const [countRows] = await dbconnect.execute(countQuery, [rollNo, currentYear, currentMonth]);
+            const [countoutRows] = await dbconnect.execute(countoutQuery, [rollNo, currentYear, currentMonth]);
+
+            // Prepare student data
+            const studentData = {
+                ...studentRows[0], // Student details
+                passes, // Combined gatepasses and outpasses
+                gatepassCount: countRows[0].count, // Gatepass count for the current month
+                outpassCount: countoutRows[0].count, // Outpass count for the current month
+            };
+
+            res.json(studentData);
+        } else {
+            res.status(404).send({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching student details:', error);
+        res.status(500).send({ error: 'Failed to fetch student details' });
+    }
+});
+
+
+
+
+app.get('/current-passes-filtered/:rollNo', async (req, res) => {
+    const { rollNo } = req.params;  // Get the rollNo from the URL parameter
+    const { from, to, type } = req.query;  // Get the date range and type from the query string
+
+    // Validate date format (Optional but recommended)
+    if (!from || !to) {
+        return res.status(400).send({ error: 'Both "from" and "to" dates are required.' });
+    }
+
+    let query;
+    let params = [rollNo, from, to, from, to];  // Basic params for rollNo and dates
+
+    // Check for pass type filter and modify query accordingly
+    if (type === 'gatepass') {
+        // Only fetch Gatepass data
+        query = `
+            SELECT 
+               
+                g.outTime AS outTime,
+                g.inTime AS inTime,
+                
+                'gatepass' AS type 
+            FROM 
+                users r
+            JOIN 
+                Gatepass g ON r.studentId = g.roll_no
+            WHERE 
+                r.studentId = ? 
+                AND ((DATE(g.outTime) BETWEEN ? AND ?) OR (DATE(g.inTime) BETWEEN ? AND ?));
+        `;
+    } else if (type === 'outpass') {
+        // Only fetch Outpass data
+        query = `
+            SELECT 
+               
+                o.outTime AS outTime,
+                o.inTime AS inTime,
+               
+                'outpass' AS type  
+            FROM 
+                users r
+            JOIN 
+                Outpass o ON r.studentId = o.roll_no
+            WHERE 
+                r.studentId = ? 
+                AND ((DATE(o.outTime) BETWEEN ? AND ?) OR (DATE(o.inTime) BETWEEN ? AND ?));
+        `;
+    } else if (type === 'all') {
+        // Fetch both Gatepass and Outpass data
+        query = `
+            SELECT 
+                
+                g.outTime AS outTime,
+                g.inTime AS inTime,
+                'Gatepass' AS type  
+            FROM 
+                users r
+            JOIN 
+                Gatepass g ON r.studentId = g.roll_no
+            WHERE 
+                r.studentId = ? 
+                AND (DATE(g.outTime) BETWEEN ? AND ? OR DATE(g.inTime) BETWEEN ? AND ?)
+            UNION ALL
+            SELECT 
+                
+                o.outTime AS outTime,
+                o.inTime AS inTime,
+                'Outpass' AS type  
+            FROM 
+                users r
+            JOIN 
+                Outpass o ON r.studentId = o.roll_no
+            WHERE 
+                r.studentId = ? 
+                AND (DATE(o.outTime) BETWEEN ? AND ? OR DATE(o.inTime) BETWEEN ? AND ?);
+        `;
+        params.push(rollNo, from, to, from, to); // Adding the params for the second query in the UNION
+    } else {
+        return res.status(400).send({ error: 'Invalid report type' });
+    }
+
+    try {
+        const [rows] = await dbconnect.execute(query, params);
+        
+        // If there are no records, return a message instead of an empty array
+        if (rows.length === 0) {
+            return res.status(404).send({ error: 'No passes found for the given filters.' });
+        }
+
+        // Return the result rows
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching passes data:', error);
+        res.status(500).send({ error: 'Failed to fetch filtered passes data' });
     }
 });
 
@@ -1836,14 +2061,32 @@ app.get('/download-current-gatepass-report', async (req, res) => {
         r.parentno,
         g.outTime AS outTime,
         g.inTime AS inTime,
-        DATE(g.date) AS date,  
-        g.fine
+       'Gatepass' AS type
         FROM 
             users r
         JOIN 
             Gatepass g ON r.studentId = g.roll_no
         WHERE 
-            (DATE(g.outTime) = CURDATE() OR DATE(g.inTime) = CURDATE());
+            (DATE(g.outTime) = CURDATE() OR DATE(g.inTime) = CURDATE())
+        UNION ALL
+
+    SELECT 
+        r.sname,
+        r.studentId,
+        r.syear,
+        r.branch,
+        r.hostelblock,
+        r.roomno,
+        r.parentno,
+        o.outTime AS outTime,
+        o.inTime AS inTime,
+        'Outpass' AS type
+    FROM 
+        users r
+    JOIN 
+        Outpass o ON r.studentId = o.roll_no
+    WHERE 
+        (DATE(o.outTime) = CURDATE() OR DATE(o.inTime) = CURDATE());
     `;
 
     try {
@@ -1864,8 +2107,8 @@ app.get('/download-current-gatepass-report', async (req, res) => {
             { header: 'Parent No', key: 'parent_no', width: 15 },
             { header: 'Out Time', key: 'outTime', width: 20 },
             { header: 'In Time', key: 'inTime', width: 20 },
-            { header: 'Date', key: 'date', width: 15 },
-            { header: 'Fine', key: 'fine', width: 10 },
+            { header: 'Type', key: 'type', width: 20 },
+
         ];
 
         // Add rows to the Excel file
@@ -1880,8 +2123,7 @@ app.get('/download-current-gatepass-report', async (req, res) => {
                 parent_no: row.parentno,
                 outTime: row.outTime,
                 inTime: row.inTime,
-                date: row.date,
-                fine: row.fine,
+                type: row.type,
             });
         });
 

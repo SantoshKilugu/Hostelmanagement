@@ -21,6 +21,7 @@ import AllStudents from './components/AllStudents';
 import Present from './components/Present';
 import NotReturned from './components/NotReturned';
 import AllPasses from './components/AllPasses';
+import Profile from './components/Profile';
 
 function App() {
   const [username, setUsername] = useState('');
@@ -164,8 +165,8 @@ function App() {
             path="/dashboard" 
             element={
               <PrivateRoute setUsername={setUsername}>
-                {/* <div className="fullscreen-bg"></div>  */}
-                <div className="overlay1"></div> 
+                <div className="fullscreen-bg"></div> 
+                <div className="overlay"></div> 
                 <div className="content">
                   <div className="header flex justify-between items-center p-4">
                     <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
@@ -256,6 +257,26 @@ function App() {
                   </div>
                   <Navbar username={username}/>
                   <AllPasses/>
+                </div>
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/studentProfile/:rollNo" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                {/* <div className="fullscreen-bg"></div>  */}
+                <div className="overlay1"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <Profile/>
                 </div>
               </PrivateRoute>
             } 
@@ -411,8 +432,8 @@ function App() {
             path="/reports" 
             element={
               <PrivateRoute setUsername={setUsername}>
-                <div className="fullscreen-bg"></div> 
-                <div className="overlay"></div> 
+                {/* <div className="fullscreen-bg"></div>  */}
+                <div className="overlay1"></div> 
                 <div className="content">
                   <div className="header flex justify-between items-center p-4">
                     <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>

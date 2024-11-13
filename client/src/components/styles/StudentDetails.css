@@ -9,42 +9,10 @@ h1, p {
     font-family: 'Arial', sans-serif; /* Font for heading and paragraph */
 }
 
-.form-container {
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); 
-}
 
-.form-grid1 {
-    display: grid;
-    grid-template-columns: 1fr 2fr; /* Label and Input fields */
-    grid-gap: 15px;
-    margin-top: 20px;
-}
 
-.form-grid1 label {
-    font-weight: bold;
-    text-align: right;
-    padding-top: 10px;
-    
-}
-.imgg{
-    margin-left: 270px;
-}
-.form-grid1 input {
-    padding: 10px;
-    border: 1.3px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-    width: 75%;
-}
 
-.student{
-    box-shadow: 3px 3px 4px 4px rgba(0, 0, 0, 0.1), 0 2px 3px rgba(0, 0, 0, 0.1); 
-}
+
 
 
 /* Button container */
@@ -114,4 +82,54 @@ td {
         text-align: left;
         padding-right: 0;
     }
+}
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-grid1 {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+}
+
+.input-field {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #797777;
+    border-radius: 4px;
+}
+
+.get-details-btn {
+    text-align: center;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.get-details-btn.enabled {
+    background-color: #090c0f; /* dark gray */
+}
+
+.get-details-btn.enabled:hover {
+    background-color: #374151; /* slightly lighter gray */
+}
+
+.get-details-btn.disabled {
+    background-color: #a1a1a1; /* light gray */
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: rgb(166, 14, 14);
+    font-size: 14px;
+    margin-top: -8px;
+    text-align: center;
 }

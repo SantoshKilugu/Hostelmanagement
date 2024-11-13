@@ -6,33 +6,49 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // Today's date as default
 
-  // Fetch the dashboard data when the component mounts
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (date) => {
+      setLoading(true);
+   
       try {
-        const response = await fetch('http://localhost:3300/dashboard-data');
-        if (!response.ok) {
-          throw new Error('Failed to fetch dashboard data');
-        }
-        const data = await response.json();
-        setDashboardData(data);
+        const response = await axios.get(`http://localhost:3300/dashboard-data`, {
+          params: { date: date || selectedDate },
+        });
+        setDashboardData(response.data);
+        setError(null);
       } catch (error) {
         setError(error.message);
       } finally {
         setLoading(false);
       }
     };
+    fetchData(selectedDate);
+  }, [selectedDate]);
 
-    fetchData();
-  }, []); // Empty dependency array ensures this runs only once on component mount
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
+  };
 
   if (loading) {
-    return <div className='text-center'>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="spinner border-t-4 border-gray-800 rounded-full w-16 h-16 animate-spin"></div>
+      </div>
+    );
+
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg max-w-md text-center">
+          <strong className="font-bold">Error:</strong>
+          <span className="block sm:inline"> {error}</span>
+        </div>
+      </div>
+    );
   }
   return (
     <div>
@@ -131,12 +147,24 @@ const Dashboard = () => {
       </div>
       </div>
       <div className="col-span-1  w-full  p-8  mr-4 mt-4 mb-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <h5 className="mb-4 text-xl text-center font-semibold tracking-tight text-gray-700 dark:text-white">Daily Report</h5>
+        
+        <h5 className="mb-4  text-xl text-center font-semibold tracking-tight text-gray-700 dark:text-white">Daily Report</h5>
+        <input
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            className="p-2 mb-6  text-center border border-gray-300 rounded-md"
+            style={{height:"40px",marginLeft:"100px"}}
+          />
+         
         <div className="flex flex-row justify-evenly">
           <div>
             <h4 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Girls</h4>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
-              Pinkpass: 50
+              Pinkpass Issued: {dashboardData.todaysGatepassGirlsIssued}
+            </p>
+            <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
+              Pinkpass: {dashboardData.todaysGatepassGirls}
             </p>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
               <div className="flex flex-row">
@@ -144,10 +172,10 @@ const Dashboard = () => {
               </div>
             </p>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
-              CheckOut: 50
+              CheckOut:  {dashboardData.todaysGatepassGirls}
             </p>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
-              CheckIn: 50
+              CheckIn:  {dashboardData.todaysInTimeGirls}
             </p>
           </div>
           <div className="border-l-2 border-gray-300 mx-4 h-35" />
@@ -155,16 +183,19 @@ const Dashboard = () => {
           <div>
             <h4 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Boys</h4>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
-              Pinkpass: 50
+              Pinkpass Issued: {dashboardData.todaysGatepassGirls}
             </p>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
-              Outpass: 10
+              Pinkpass:  {dashboardData. todaysGatepassBoys}
             </p>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
-              CheckOut: 50
+              Outpass:  {dashboardData.todaysOutpassBoys}
             </p>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
-              CheckIn: 50
+              CheckOut:  {dashboardData. todaysOutTimeBoys}
+            </p>
+            <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
+              CheckIn:  {dashboardData.todaysInTimeBoys}
             </p>
           </div>
         </div>

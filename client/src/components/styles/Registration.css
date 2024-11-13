@@ -19,7 +19,12 @@ body {
     filter: brightness(0.5); /* Darken the image */
     z-index: 0; /* Ensure it's behind the content */
 }
+.opt{
 
+    padding-bottom: 18px;
+    width: 40px;
+    background:  #e8edf1;
+}
 .registration-container {
     max-width: 650px;
     margin: 50px auto;
@@ -72,10 +77,10 @@ input {
     transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for effects */
 }
 
-input:focus {
-    border-color: #a2c4e8; /* Change border color on focus */
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Box shadow on focus */
-}
+/* input:focus {
+    border-color: #a2c4e8; 
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); 
+} */
 
 /* Button styles */
 .button-container {

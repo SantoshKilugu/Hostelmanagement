@@ -106,6 +106,14 @@ const handleInputChange = (e) => {
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = students.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(students.length / rowsPerPage);
+    if (loading) {
+        return (
+          <div className="flex justify-center items-center h-screen">
+            <div className="spinner border-t-4 border-gray-800 rounded-full w-16 h-16 animate-spin"></div>
+          </div>
+        );
+    
+      }
 
     return (
         <div>
@@ -128,8 +136,8 @@ const handleInputChange = (e) => {
                 >
                     <option value="all"><span className='text-gray-300'>-Gender-</span></option>
 
-                    <option value="Girls">Girls</option>
-                    <option value="Boys">Boys</option>
+                    <option value="Female">Girls</option>
+                    <option value="Male">Boys</option>
                   
                 </select>
                 <select

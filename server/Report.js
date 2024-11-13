@@ -119,7 +119,7 @@ export async function fetchAndEmailData(fromDate, toDate,filterType) {
                 DATE(o.outTime) BETWEEN ? AND ? 
                 OR DATE(o.inTime) BETWEEN ? AND ?;  
         `;
-        params.push(from, to,from,to); // Add params for second query in the UNION
+        params.push(fromDate, toDate,fromDate,toDate); // Add params for second query in the UNION
     } else {
         console.log("Invalid report type.");
         return;

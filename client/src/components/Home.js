@@ -79,8 +79,8 @@ const Home = () => {
         <div className=" welcome absolute inset-0 flex items-center  justify-center z-20">
           <div className="bg-opacity-60 p-4 rounded text-center">
             <h1 className="text-white text-3xl font-bold" style={{fontSize:"35px" , marginBottom:"10px"}}>Welcome to <span style={{ color: colors[0],opacity:0.8 }}>G</span><span style={{ color: colors[1],opacity:0.8 }}>M</span><span style={{ color: colors[2],opacity:0.8 }}>R</span> Institute of Technology</h1>
-            <h2 className="text-white text-3xl font-bold">GatePass Generation</h2>
-
+            <h2 className="text-white text-3xl font-bold" >GatePass Generation</h2>
+            <marquee className='' > kgjg</marquee>
           </div>
 
         </div>

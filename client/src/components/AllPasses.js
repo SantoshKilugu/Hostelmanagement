@@ -12,6 +12,7 @@ const AllPasses= () => {
     const [id, setId] = useState('');
     const [blockName, setBlockName] = useState('all');
     const [gender,setGender]=useState('all');
+    const [error, setError] = useState(null);
 
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
@@ -31,11 +32,13 @@ const AllPasses= () => {
  }
  useEffect(() => {
     const fetchData = async () => {
+        setLoading(true);
         try {
             const response = await axios.get('http://localhost:3300/all-passes');
             setStudents(response.data);
         } catch (error) {
             console.error('Error fetching gatepass data:', error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -106,6 +109,24 @@ const handleInputChange = (e) => {
     const indexOfFirstRow = indexOfLastRow - rowsPerPage;
     const currentRows = students.slice(indexOfFirstRow, indexOfLastRow);
     const totalPages = Math.ceil(students.length / rowsPerPage);
+     if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="spinner border-t-4 border-gray-800 rounded-full w-16 h-16 animate-spin"></div>
+      </div>
+    );
+
+  }
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg max-w-md text-center">
+          <strong className="font-bold">Error:</strong>
+          <span className="block sm:inline"> {error}</span>
+        </div>
+      </div>
+    );
+  }
 
     return (
         <div>
@@ -128,8 +149,8 @@ const handleInputChange = (e) => {
                 >
                     <option value="all"><span className='text-gray-300'>-Gender-</span></option>
 
-                    <option value="Girls">Girls</option>
-                    <option value="Boys">Boys</option>
+                    <option value="Female">Girls</option>
+                    <option value="Male">Boys</option>
                   
                 </select>
                 <select

@@ -48,7 +48,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(241, 255, 255, 0.5); /* Dark overlay */
+  background-color: rgb(255, 255, 255); /* Dark overlay */
   z-index: 0; /* Layer above the background image */
 }
 
