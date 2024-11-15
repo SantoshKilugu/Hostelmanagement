@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import './styles/Profile.css';
+
 const Profile = () => {
   const { rollNo } = useParams(); // Get studentId from the URL
   const [loading, setLoading] = useState(true);

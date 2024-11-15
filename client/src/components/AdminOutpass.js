@@ -262,10 +262,9 @@ doc.text('Issued OutTime: ', 3, 77);
 doc.setFont('helvetica', 'normal');
 doc.text(`${formattedDate} ${formattedTime}`?.toString() || '',  29, 77); // Display only time
 
-doc.setFont('helvetica', 'bold');
-doc.text('Exp OutDate:', 3, 84);
-doc.setFont('helvetica', 'normal');
-doc.text(expectedOutTime?.toString() || '',  28.5, 84); // Display only date
+
+doc.setFont('helvetica', 'italic');
+doc.text('Note: Return to college by 8:30pm',  10.5, 84); // Display only date
 
 // Display only date
 

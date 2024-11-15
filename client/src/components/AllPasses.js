@@ -159,9 +159,14 @@ const handleInputChange = (e) => {
                     className=" mr-2 border border-gray-300 rounded text-center"
                     style={{width:"150px"}}
                 >
-                    <option value="all"><span className='text-gray-300'>-Block-</span></option>
-                    <option value="Vamsadara">Vamsadara</option>
-                    <option value="Nilgiri">Nilgiri</option>
+                    <option value="all"><span className='opt text-gray-300'>-Block-</span></option>
+                    <option value="Satpura" className='opt '>SATPURA</option>
+    <option value="Himalaya" className='opt'>HIMALAYA</option>
+    <option value="Aravali" className='opt'>ARAVALI</option>
+    <option value="Nilagiri" className='opt'>NILAGIRI</option>
+    <option value="Vindhya" className='opt'>VINDHYA</option>
+    <option value="Vamsadhara" className='opt'>VAMSADHARA</option>
+    <option value="Nagavali" className='opt'>NAGAVALI</option>
                   
                 </select>
                 <button
