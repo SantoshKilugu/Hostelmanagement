@@ -26,6 +26,7 @@ const Profile = () => {
  
   useEffect(() => {
     const fetchStudentDetails = async () => {
+      setLoading(true);
         try {
             const response = await fetch(`http://localhost:3300/get-student-details-profile/${rollNo}`);
             if (!response.ok) {
@@ -37,6 +38,7 @@ const Profile = () => {
 
             // Combine gatepasses and outpasses into a single passes array
             setPasses(data.passes); 
+            setLoading(false);
         } catch (err) {
             setError(err.message);
             setStudentData(null); // Reset student data on error
@@ -49,9 +51,15 @@ const Profile = () => {
   if (error) {
     return <div>Error: {error}</div>;
   }
-  if (!studentData) {
-    return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="spinner border-t-4 border-gray-800 rounded-full w-16 h-16 animate-spin"></div>
+      </div>
+    );
+
   }
+
   const fetchData = async (from, to) => {
     setLoading(true);
     try {
@@ -122,7 +130,7 @@ const Profile = () => {
       <h3 className="flex gap-4 text-lg font-semibold   border-b border-blue-200 pb-2">
       <span style={{marginLeft:"60px"}} className='text-gray-900'>Details</span>
         {/* Edit Icon */}
-        <Link to="/user/profile/edit">
+        <Link to={rollNo ? `/updateprofile/${rollNo}` : '#'}>
         <svg 
           className="w-6 h-6 text-gray-800 dark:text-white"
           aria-hidden="true"

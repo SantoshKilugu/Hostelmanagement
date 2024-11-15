@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useSnackbar } from 'notistack';
 const Checkinout = () => {
   const [rollNo, setRollNo] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-
-
+  const {enqueueSnackbar} = useSnackbar();
 
 
   const sendSMS = async ( message) => {
@@ -30,55 +30,89 @@ const Checkinout = () => {
     try {
       const response = await fetch('http://localhost:3300/run-jar-verify-checkin-out', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.ok) {
         const data = await response.json();
-        sendSMS(data.parentno)
-        setMessage('Student checkin successfull!');
-        // console.log('User data from fingerprint:', data);
+        sendSMS(data.parentno);
+        setMessage('Student check-in successful!');
+        enqueueSnackbar('Student check-in successful!', { 
+          variant: 'success', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
       } else {
         setError('Fingerprint verification failed.');
+        enqueueSnackbar('Fingerprint verification failed.', { 
+          variant: 'error', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
       }
     } catch (err) {
       console.error('Error verifying fingerprint:', err);
       setError('Server error occurred during fingerprint verification.');
+      enqueueSnackbar('Server error occurred during fingerprint verification.', { 
+        variant: 'error', 
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000 
+      });
     }
   };
 
-  // Function to check in with roll number
   const handleCheckIn = async () => {
     setMessage('');
     setError('');
     if (rollNo.trim() === '') {
       setError('Please enter a valid Roll Number.');
+      enqueueSnackbar('Please enter a valid Roll Number.', { 
+        variant: 'warning', 
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000 
+      });
       return;
     }
 
     try {
       const response = await fetch(`http://localhost:3300/checkin-out/${rollNo}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.ok) {
         const data = await response.json();
         sendSMS(data.parentno);
-        setMessage('Check-in successful! ');
+        setMessage('Check-in successful!');
+        enqueueSnackbar('Check-in successful!', { 
+          variant: 'success', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
         setError('');
       } else if (response.status === 404) {
         setError('No pending checkout record found for the roll number.');
+        enqueueSnackbar('No pending checkout record found for the roll number.', { 
+          variant: 'error', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
       } else {
         setError('Check-in failed.');
+        enqueueSnackbar('Check-in failed.', { 
+          variant: 'error', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
       }
     } catch (err) {
       console.error('Error during check-in:', err);
       setError('Server error occurred during check-in.');
+      enqueueSnackbar('Server error occurred during check-in.', { 
+        variant: 'error', 
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000 
+      });
     }
   };
 

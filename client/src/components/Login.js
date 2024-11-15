@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import Cookies from 'js-cookie'; // Import js-cookie
 import logo from '../assets/logo.jpg';
 import backgroundImage from '../assets/background.jpg';
-
+import { useSnackbar } from 'notistack';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const {enqueueSnackbar} = useSnackbar();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,16 +25,18 @@ const Login = () => {
       const result = await response.json();
 
       if (response.ok) {
-        // Store the token in cookies
-        Cookies.set('token', result.token, { expires: 1/24 }); // Set token cookie to expire in 1 hour 
-        window.location.href = '/';
+        // Store the token in cookies and show success message
+        Cookies.set('token', result.token, { expires: 1 / 24 });
+        enqueueSnackbar('Login Successful!', { variant: 'success' });
+        setTimeout(() => {
+          window.location.href = '/'; // Redirect after success message
+        }, 1500); // Delay redirection to allow time for Snackbar display
       } else {
-        console.error('Login error:', result);
-        setError(result.message);
+        enqueueSnackbar(result.message || 'Login Failed', { variant: 'error' });
       }
     } catch (err) {
       console.error('Error during login:', err);
-      setError('Failed to log in');
+      enqueueSnackbar('Failed to log in', { variant: 'error' });
     }
   };
 

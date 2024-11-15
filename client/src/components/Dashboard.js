@@ -45,7 +45,7 @@ const Dashboard = () => {
       <div className="flex justify-center items-center h-screen">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg max-w-md text-center">
           <strong className="font-bold">Error:</strong>
-          <span className="block sm:inline"> {error}</span>
+          <span className="block sm:inline"> Internet Connection Issue</span>
         </div>
       </div>
     );
@@ -58,7 +58,7 @@ const Dashboard = () => {
         <div className="w-full max-w-sm  p-6 m-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
           <Link to="/getStudents">
             <h6 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">{dashboardData.totalStudents}</h6>
-            <h5 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Total Students</h5>
+            <h5 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Total students in hostel</h5>
           </Link>
           <div className="flex items-center space-x-4">
             <Link to="" className="flex items-center">
@@ -80,7 +80,7 @@ const Dashboard = () => {
         <div className="w-full max-w-sm  p-6 m-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
           <Link to="/passes">
             <h6 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">{dashboardData.totalPasses}</h6>
-            <h5 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Total Passes</h5>
+            <h5 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Total passes issued</h5>
           </Link>
           <div className="flex items-center space-x-4">
             <Link to="#" className="flex items-center">
@@ -103,7 +103,7 @@ const Dashboard = () => {
         <div className="w-full max-w-sm  p-6 m-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
           <Link to="/present">
             <h6 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">{dashboardData.present}</h6>
-            <h5 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Present</h5>
+            <h5 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Total students present in hostel</h5>
           </Link>
           <div className="flex items-center space-x-4">
             <Link to="#" className="flex items-center">
@@ -125,7 +125,7 @@ const Dashboard = () => {
         <div className="w-full max-w-sm p-6 m-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
           <Link to="/notpresent">
             <h6 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">{dashboardData.notRet}</h6>
-            <h5 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Yet to return</h5>
+            <h5 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white"> Total students yet to return</h5>
           </Link>
           <div className="flex items-center space-x-4">
             <Link to="#" className="flex items-center">

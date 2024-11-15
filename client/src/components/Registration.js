@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './styles/Registration.css';
 import { useParams } from 'react-router-dom';
+import {useSnackbar} from 'notistack';
 const Registration = ({ type }) => {
   const { type1 } = useParams();
     const [formData, setFormData] = useState({
         name: '',
-        roll_no: '',
-       
+        roll_no: '', 
         year: '',
         branch: '',
         hostel_block_name: '',
@@ -20,6 +20,8 @@ const Registration = ({ type }) => {
     // const [activeButton, setActiveButton] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null); // State to hold the selected file
     const [errors, setErrors] = useState({});
+    const [rollNo,setRollNo] = useState();
+    const {enqueueSnackbar} = useSnackbar();
   
     const validateForm = () => {
         const newErrors = {};
@@ -62,156 +64,152 @@ const Registration = ({ type }) => {
         
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) {
-            alert('Please correct the errors in the form.');
-            return;
-        }
+      e.preventDefault();
+      if (!validateForm()) {
+          enqueueSnackbar('Please correct the errors in the form.', { variant: 'warning' });
+          return;
+      }
 
-        try {
-            const response = await axios.post('http://localhost:3300/register', formData);
-            alert(response.data.message);
+      try {
+          const response = await axios.post('http://localhost:3300/register', formData);
+          enqueueSnackbar(response.data.message, { variant: 'success' });
 
-            setFormData({
-                name: '',
-                roll_no: '',
-               
-                year: '',
-                branch: '',
-                hostel_block_name: '',
-                room_no: '',
-                parent_no: '',
-                gender:''
-            });
-            setIsRegistered(true);
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Registration failed. Please try again.');
-        }
-    };
+          setFormData({
+              name: '',
+              roll_no: '',
+              year: '',
+              branch: '',
+              hostel_block_name: '',
+              room_no: '',
+              parent_no: '',
+              gender: ''
+          });
+          setIsRegistered(true);
+      } catch (error) {
+          console.error('Error:', error);
+          enqueueSnackbar('Registration failed. Please try again.', { variant: 'error' });
+      }
+  };
+const handleAddFingerprint = async () => {
+  try {
+      const response = await axios.post('http://localhost:3300/run-jar');
+      const data = response.data;
 
-    const handleAddFingerprint = async () => {
-        try {
-            const response = await axios.post('http://localhost:3300/run-jar');
-            const data = response.data;
+      if (data.length > 0) {
+          setUserData(data[0]);
+          enqueueSnackbar("Fingerprint added successfully.", { variant: 'success' });
+      } else {
+          enqueueSnackbar("No user found.", { variant: 'warning' });
+      }
+  } catch (error) {
+      console.error('Error running JAR:', error);
+      enqueueSnackbar('Error occurred while adding fingerprint.', { variant: 'error' });
+  }
+};
 
-            if (data.length > 0) {
-                setUserData(data[0]);
-                alert("Fingerprint added successfully.");
-            } else {
-                alert("No user found.");
-            }
-        } catch (error) {
-            console.error('Error running JAR:', error);
-            // alert('Error occurred while adding fingerprint.');
-        }
-    };
-    const [rollNo, setRollNo] = useState('');
-
-    const handleVerifyRollNo = async () => {
-        try {
-          const response = await axios.get(`http://localhost:3300/verify-rollupdate/${rollNo}`);
-          if (response.data.length > 0) {
-            const user = response.data[0];
-            setUserData(user);
-            setFormData({
+const handleVerifyRollNo = async () => {
+  try {
+      const response = await axios.get(`http://localhost:3300/verify-rollupdate/${rollNo}`);
+      if (response.data.length > 0) {
+          const user = response.data[0];
+          setUserData(user);
+          setFormData({
               name: user.sname,
               roll_no: user.studentId,
-              gender:user.gender,
+              gender: user.gender,
               year: user.syear,
               branch: user.branch,
               hostel_block_name: user.hostelblock,
               room_no: user.roomno,
               parent_no: user.parentno
-            });
-          } else {
-            alert("No user found with that roll number.");
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          alert('Failed to verify roll number.');
-        }
-      };
-    
-      const handleUpdateUser = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) {
-          alert('Please correct the errors in the form.');
-          return;
-        }
-    
-        try {
-          const response = await axios.put(`http://localhost:3300/update-user`, formData);
-          alert(response.data.message);
-          setUserData(null); // Clear user data after updating
-          setFormData({ // Reset form data
-            name: '',
-            roll_no: '',
-            year: '',
-            branch: '',
-            hostel_block_name: '',
-            room_no: '',
-            parent_no: '',
-            gender:''
           });
-        } catch (error) {
-          console.error('Error updating user:', error);
-          alert('Update failed. Please try again.');
-        }
-      };
-    
-
-
-    const handleUpdateFingerprint = async () => {
-        try {
-            const response = await axios.post('http://localhost:3300/run-jar-update');
-            const data = response.data;
-
-            if (data.length > 0) {
-                setUserData(data[0]);
-                alert("Fingerprint updated successfully.");
-            } else {
-                alert("No user found.");
-            }
-        } catch (error) {
-            console.error('Error running JAR:', error);
-            // alert('Error occurred while adding fingerprint.');
-        }
-    };
-    const handleImageExcelSubmit = async (e) => {
-      e.preventDefault();
-      const formData = new FormData();
-      formData.append('imageExcelFile', selectedFile); // Ensure this matches the server's expected field name
-
-      try {
-          const response = await axios.post('http://localhost:3300/upload-images-excel', formData, {
-              headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          alert(response.data.message);
-      } catch (error) {
-          console.error('Error uploading image Excel file:', error);
-          alert('Failed to upload image Excel file.');
+      } else {
+          enqueueSnackbar("No user found with that roll number.", { variant: 'warning' });
       }
-  };
-    const handleExcelSubmit = async (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append('excelFile', selectedFile); // Ensure this matches the server's expected field name
+  } catch (error) {
+      console.error('Error fetching user data:', error);
+      enqueueSnackbar('Failed to verify roll number.', { variant: 'error' });
+  }
+};
 
-        try {
-            const response = await axios.post('http://localhost:3300/upload-excel', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            alert(response.data.message);
-        } catch (error) {
-            console.error('Error uploading Excel file:', error);
-            alert('Failed to upload Excel file.');
-        }
-    };
+const handleUpdateUser = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) {
+      enqueueSnackbar('Please correct the errors in the form.', { variant: 'warning' });
+      return;
+  }
 
-    const handleFileChange = (e) => {
-        setSelectedFile(e.target.files[0]); // Set the selected file
-    };
+  try {
+      const response = await axios.put(`http://localhost:3300/update-user`, formData);
+      enqueueSnackbar(response.data.message, { variant: 'success' });
+      setUserData(null); // Clear user data after updating
+      setFormData({ // Reset form data
+          name: '',
+          roll_no: '',
+          year: '',
+          branch: '',
+          hostel_block_name: '',
+          room_no: '',
+          parent_no: '',
+          gender: ''
+      });
+  } catch (error) {
+      console.error('Error updating user:', error);
+      enqueueSnackbar('Update failed. Please try again.', { variant: 'error' });
+  }
+};
+const handleUpdateFingerprint = async () => {
+  try {
+      const response = await axios.post('http://localhost:3300/run-jar-update');
+      const data = response.data;
+
+      if (data.length > 0) {
+          setUserData(data[0]);
+          enqueueSnackbar("Fingerprint updated successfully.", { variant: 'success' });
+      } else {
+          enqueueSnackbar("No user found.", { variant: 'warning' });
+      }
+  } catch (error) {
+      console.error('Error running JAR:', error);
+      enqueueSnackbar('Error occurred while updating fingerprint.', { variant: 'error' });
+  }
+};
+
+const handleImageExcelSubmit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData();
+  formData.append('imageExcelFile', selectedFile); // Ensure this matches the server's expected field name
+
+  try {
+      const response = await axios.post('http://localhost:3300/upload-images-excel', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      enqueueSnackbar(response.data.message, { variant: 'success' });
+  } catch (error) {
+      console.error('Error uploading image Excel file:', error);
+      enqueueSnackbar('Failed to upload image Excel file.', { variant: 'error' });
+  }
+};
+
+const handleExcelSubmit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData();
+  formData.append('excelFile', selectedFile); // Ensure this matches the server's expected field name
+
+  try {
+      const response = await axios.post('http://localhost:3300/upload-excel', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      enqueueSnackbar(response.data.message, { variant: 'success' });
+  } catch (error) {
+      console.error('Error uploading Excel file:', error);
+      enqueueSnackbar('Failed to upload Excel file.', { variant: 'error' });
+  }
+};
+
+const handleFileChange = (e) => {
+  setSelectedFile(e.target.files[0]); // Set the selected file
+};
 
    
 
@@ -219,29 +217,15 @@ const Registration = ({ type }) => {
     return (
         <div className="registration-container">
           
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Registration</h2>
 
-            {/* {!activeButton && (
-                <div className="button-container">
-                    <button onClick={() => handleButtonClick('singleUser')} className="bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200">
-                        Single User
-                    </button>
-                    <button onClick={() => handleButtonClick('addFingerprint')} className="bg-gray-800 text-white font-semibold py-2  px-4 rounded hover:bg-gray-700 transition duration-200">
-                        Add Fingerprint
-                    </button>
-                    <button onClick={() => handleButtonClick('updateFingerprint')} className="bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200">
-                        Update Fingerprint
-                    </button>
-                    <button onClick={() => handleButtonClick('moreUsers')} className="bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 transition duration-200">
-                        More Users
-                    </button>
-
-                </div>
-            )} */}
+           
 
 
 {type === 'updateUser' && (
         <div>
+            
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Update User</h2>
+
                 <input 
         type="text" 
         value={rollNo} 
@@ -437,6 +421,8 @@ const Registration = ({ type }) => {
 
             {type === 'singleUser' && (
                 <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Add User</h2>
+
                    <form className="max-w-md mx-auto" onSubmit={handleSubmit}>
   <div className="relative z-0 w-full mb-5 group">
     <input
@@ -621,6 +607,8 @@ const Registration = ({ type }) => {
 
             {type === 'moreUsers' && (
                 <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Add Bulk Users</h2>
+
                     <form onSubmit={handleExcelSubmit}>
                         <input type="file" name="excelFile" accept=".xlsx, .xls" onChange={handleFileChange} required />
                         <button type="submit" className="bg-gray-800 text-white font-semibold py-2 px-4 rounded ml-3 hover:bg-gray-700 transition duration-200">Upload Excel</button>
@@ -635,6 +623,8 @@ const Registration = ({ type }) => {
 
 {type === 'moreImages' && (
                 <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Add Images</h2>
+
                     <form onSubmit={handleImageExcelSubmit}>
                         <input type="file" name="imageExcelFile" accept=".xlsx, .xls" onChange={handleFileChange} required />
                         <button type="submit" className="bg-gray-800 text-white font-semibold py-2 px-4 rounded ml-3 hover:bg-gray-700 transition duration-200">Upload Excel with Images</button>
@@ -644,6 +634,8 @@ const Registration = ({ type }) => {
 
             {type === 'addFingerprint' && (
                 <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Add Fingerprint</h2>
+
                     {/* Add Fingerprint logic can be placed here or kept in the same handler */}
                     <div className="button-container">
                         <button onClick={handleAddFingerprint} className="bg-gray-800 text-white font-semibold py-2 mx-auto block px-4 rounded hover:bg-gray-700 transition duration-200"> Fingerprint</button>
@@ -658,6 +650,8 @@ const Registration = ({ type }) => {
 
 {type === 'updateFingerprint' && (
                 <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Update Fingerprint</h2>
+
                     {/* Add Fingerprint logic can be placed here or kept in the same handler */}
                     <div className="button-container">
                         <button onClick={handleUpdateFingerprint} className="bg-gray-800 text-white font-semibold py-2 mx-auto block px-4 rounded hover:bg-gray-700 transition duration-200"> Fingerprint</button>

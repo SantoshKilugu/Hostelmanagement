@@ -2,9 +2,17 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './styles/Navbar.css';
 import { FaCaretDown , FaArrowRight } from 'react-icons/fa';
+import { useSnackbar } from 'notistack';
 
 const Navbar = ({ username }) => {
   const navigate = useNavigate();
+  const {enqueueSnackbar} =useSnackbar();
+
+  const handleDashboardClick = () => {
+    navigate('/dashboard'); 
+    window.location.reload(); 
+  };
+
 
   const handleLogout = async () => {
     try {
@@ -14,13 +22,21 @@ const Navbar = ({ username }) => {
       });
 
       if (response.ok) {
-        console.log('Logout successful');
-        // Redirect to login page or perform any other action after logout
+        enqueueSnackbar('Logout successful', { 
+          variant: 'success', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
         navigate('/login'); // Redirect to login page
       } else {
         throw new Error('Logout failed');
       }
     } catch (error) {
+      enqueueSnackbar('Error during logout', { 
+        variant: 'error', 
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000 
+      });
       console.error('Error during logout:', error);
     }
   };
@@ -51,7 +67,7 @@ const Navbar = ({ username }) => {
           )}
            {username === 'admin' && (
             <li className="dropdown">
-              <Link to="/dashboard">
+              <Link to="/dashboard" onClick={handleDashboardClick}>
                 <span className='flex items-center'>Dashboard</span>
               </Link>
               

@@ -22,11 +22,18 @@ import Present from './components/Present';
 import NotReturned from './components/NotReturned';
 import AllPasses from './components/AllPasses';
 import Profile from './components/Profile';
+import UpdateProfile from './components/UpdateProfile';
+import { SnackbarProvider } from 'notistack';
 
 function App() {
   const [username, setUsername] = useState('');
   return (
-    <Router>
+    <Router><SnackbarProvider
+      maxSnack={3}
+        anchorOrigin={{
+            vertical:'top',
+            horizontal:'center'
+        }}>
       <div>
         <Routes>
           {/* Public Route */}
@@ -177,6 +184,26 @@ function App() {
                   </div>
                   <Navbar username={username}/>
                   <Dashboard/>
+                </div>
+              </PrivateRoute>
+            } 
+          />
+           <Route 
+            path="/updateprofile/:rollNo" 
+            element={
+              <PrivateRoute setUsername={setUsername}>
+                <div className="fullscreen-bg"></div> 
+                <div className="overlay"></div> 
+                <div className="content">
+                  <div className="header flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold" style={{fontFamily:"lucida"}}>Gate Pass Generation</h1>
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{username}</span>
+                      <FaUserCircle className="text-3xl" />
+                    </div>
+                  </div>
+                  <Navbar username={username}/>
+                  <UpdateProfile/>
                 </div>
               </PrivateRoute>
             } 
@@ -471,7 +498,9 @@ function App() {
           />
         </Routes>
       </div>
+    </SnackbarProvider>
     </Router>
+    
   );
 }
 
