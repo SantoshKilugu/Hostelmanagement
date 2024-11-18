@@ -88,6 +88,9 @@ td {
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #E0F0FF; 
+    width: 650px;
+    border-radius: 0;
 }
 
 .form-grid1 {

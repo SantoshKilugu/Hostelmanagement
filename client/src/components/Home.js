@@ -151,7 +151,8 @@ const Home = () => {
         }}
       >
         <marquee behavior="scroll" direction="left">
-          Designed and Developed by Dr.K.Lakshman Rao ,Associate Professor , GMRIT.
+          Designed and Developed by  L.Chandini , M.Naveen , K.Santosh, M. Bala 
+          Krishna under the guidance of <b>Dr.K.Lakshman Rao</b> , Associate Professor , GMRIT. @2021-25
         </marquee>
       </footer>
     </div>
@@ -159,3 +160,4 @@ const Home = () => {
 };
 
 export default Home;
+

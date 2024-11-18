@@ -10,6 +10,7 @@ const AdminPass = () => {
   const [error1, setError1] = useState('');
   const [expectedOutTime, setExpectedOutTime] = useState('');
   const [fingerprintData, setFingerprintData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Function to verify and fetch full data for Pink Pass
   const handleVerifyPinkPass = async () => {
@@ -26,9 +27,12 @@ const AdminPass = () => {
     
     try {
       const response = await fetch(`http://localhost:3300/verify-roll/${rollNo}`);
+      setLoading(true)
       if (response.ok) {
         const data = await response.json();
         setUserData(data);
+      setLoading(false)
+
         setError(''); // Clear error
 
         // After fetching user data, update the gatepass table
@@ -37,15 +41,21 @@ const AdminPass = () => {
         
       } else if (response.status === 404) {
         setError('User not found');
+      setLoading(false)
+
         setUserData(null);
       } else {
         setError('Error fetching user data');
+      setLoading(false)
+
         setUserData(null);
       }
     } catch (err) {
       console.log(err);
       setError('Server error');
       setUserData(null);
+      setLoading(false)
+
     }
   };
 
@@ -101,23 +111,33 @@ if(expectedDateTime < currentDateTime){
   const handleVerifyFingerprint = async () => {
     setUserData(null);
     setError(null)
+   
+
     if (expectedOutTime.trim() === '') {
         setError('Please enter a valid Expected Out Time.');
         return;
       }
     try {
         const response = await axios.post('http://localhost:3300/run-jar-verify');
+        setLoading(true)
         const data = response.data;
+
 
         // Assuming data is the student object now
         if (data && Object.keys(data).length > 0) {
             setFingerprintData(data); // Set the entire student data
             await updateGatepassIssue(data.studentId,expectedOutTime); // Use data.studentId
+            setLoading(false)
         } else {
             alert("No user found.");
+            setLoading(false)
+
         }
     } catch (error) {
         console.error('Error running JAR:', error);
+        setError()
+        setLoading(false)
+
         // alert('Error occurred while adding fingerprint.');
     }
 };
@@ -341,7 +361,14 @@ alert("No user data to generate the Pinkpass.");
 }
   };
  
-  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="spinner border-t-4 border-gray-800 rounded-full w-16 h-16 animate-spin"></div>
+      </div>
+    );
+
+  }
  
   
   return (

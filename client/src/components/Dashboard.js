@@ -52,7 +52,7 @@ const Dashboard = () => {
   }
   return (
     <div>
- <div className="grid grid-cols-3 m-4">
+ <div className="grid grid-cols-3 m-8" style={{marginTop:"50px"}}>
     <div className='flex flex-col col-span-2 '>
       <div className="flex flex-row justify-evenly mb-2 ">
         <div className="w-full max-w-sm  p-6 m-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -146,7 +146,7 @@ const Dashboard = () => {
        
       </div>
       </div>
-      <div className="col-span-1  w-full  p-8  mr-4 mt-4 mb-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+      <div className="col-span-1  w-full  p-8  mr-4  mb-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         
         <h5 className="mb-4  text-xl text-center font-semibold tracking-tight text-gray-700 dark:text-white">Daily Report</h5>
         <input
