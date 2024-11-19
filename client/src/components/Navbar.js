@@ -56,7 +56,7 @@ const Navbar = ({ username }) => {
                 <Link to="/registration/updateUser" style={{ fontSize: '13px' }}>Update User</Link>
                 <Link to="/registration/addFingerprint" style={{ fontSize: '13px' }}>Add Fingerprint</Link>
                 <Link to="/registration/updateFingerprint" style={{ fontSize: '13px' }}>Update Fingerprint</Link>
-                <Link to="/registration/moreUsers" style={{ fontSize: '13px' }}>Add More Users</Link>
+                <Link to="/registration/moreUsers" style={{ fontSize: '13px' }}>Bulk Users</Link>
                 <Link to="/registration/moreImages" style={{ fontSize: '13px' }}>Student Images</Link>
               </div>
             </li>

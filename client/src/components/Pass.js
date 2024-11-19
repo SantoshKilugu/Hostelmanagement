@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './styles/Pass.css'; // Ensure you import the CSS file for styling
 import jsPDF from 'jspdf';
 import axios from 'axios';
+import { enqueueSnackbar } from 'notistack';
 
 const Pass = () => {
   const [rollNo, setRollNo] = useState('');
@@ -54,13 +55,16 @@ const Pass = () => {
         });
         if (response.data.success) {
             console.log('SMS sent successfully!');
+            enqueueSnackbar('SMS Sent Successfully!',{variant:'success'});
         } else {
             console.error('Failed to send SMS:', response.data.message);
+            enqueueSnackbar('SMS not Sent !',{variant:'error'});
         }
     } catch (error) {
         console.error('Error sending SMS:', error);
     }
 };
+
   // Function to update gate pass with current date and time
   const updateGatepass = async (rollNo,parentno) => {
     setError(null);

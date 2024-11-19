@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useSnackbar } from 'notistack';
 const Checkingate = () => {
   const [rollNo, setRollNo] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-
+  const {enqueueSnackbar} = useSnackbar();
 
 
 
@@ -16,9 +17,11 @@ const Checkingate = () => {
             message: message
         });
         if (response.data.success) {
-            console.log('SMS sent successfully!');
+            console.log('SMS sent Successfully!');
+            enqueueSnackbar('SMS Sent Successfully!', { variant: 'success' });
         } else {
             console.error('Failed to send SMS:', response.data.message);
+            enqueueSnackbar('SMS not Sent !', { variant: 'error' });
         }
     } catch (error) {
         console.error('Error sending SMS:', error);
@@ -39,13 +42,28 @@ const Checkingate = () => {
       if (response.ok) {
         const data = await response.json();
         sendSMS(data.parentno);
+        enqueueSnackbar('Check-in successful!', { 
+          variant: 'success', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
        
       } else {
         setError('Fingerprint verification failed.');
+        enqueueSnackbar('Fingerprint verification failed.', { 
+          variant: 'error', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
       }
     } catch (err) {
       console.error('Error verifying fingerprint:', err);
       setError('Server error occurred during fingerprint verification.');
+      enqueueSnackbar('Server error occurred during fingerprint verification.', { 
+        variant: 'error', 
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000 
+      });
     }
   };
 
@@ -70,15 +88,35 @@ const Checkingate = () => {
         const data = await response.json();
         sendSMS(data.parentno);
         setMessage('Check-in successful! ');
+        enqueueSnackbar('Check-in successful!', { 
+          variant: 'success', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
         setError('');
       } else if (response.status === 404) {
         setError('No pending checkout record found for the roll number.');
+        enqueueSnackbar('No pending checkout record found for the roll number.', { 
+          variant: 'error', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
       } else {
         setError('Check-in failed.');
+        enqueueSnackbar('Check-in failed.', { 
+          variant: 'error', 
+          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          autoHideDuration: 3000 
+        });
       }
     } catch (err) {
       console.error('Error during check-in:', err);
       setError('Server error occurred during check-in.');
+      enqueueSnackbar('Server error occurred during check-in.', { 
+        variant: 'error', 
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        autoHideDuration: 3000 
+      });
     }
   };
 

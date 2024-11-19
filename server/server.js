@@ -961,7 +961,53 @@ app.post('/upload-excel', upload.single('excelFile'), async (req, res) => {
     }
 });
 
+app.post('/upload-update-excel', upload.single('excelFile'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send({ message: 'No file uploaded.' });
+    }
 
+    try {
+        const workbook = XLSX.readFile(req.file.path);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(sheet);
+
+        for (const row of data) {
+            const { roll_no, name, year, branch, hostel_block_name, room_no, parent_no, gender } = row;
+            const query = `UPDATE users SET sname = ?, syear = ?, branch = ?, hostelblock = ?, roomno = ?, parentno = ?, gender = ? WHERE studentId = ?`;
+            const values = [name, year, branch, hostel_block_name, room_no, parent_no, gender || null, roll_no];
+            await dbconnect.execute(query, values);
+        }
+
+        res.status(200).send({ message: 'Users updated successfully.' });
+    } catch (error) {
+        console.error('Error processing Excel file:', error);
+        res.status(500).send({ message: 'Failed to update users.' });
+    }
+});
+
+app.post('/upload-delete-excel', upload.single('excelFile'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send({ message: 'No file uploaded.' });
+    }
+
+    try {
+        const workbook = XLSX.readFile(req.file.path);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(sheet);
+
+        for (const row of data) {
+            const { roll_no } = row;
+            const query = `DELETE FROM users WHERE studentId = ?`;
+            const values = [roll_no];
+            await dbconnect.execute(query, values);
+        }
+
+        res.status(200).send({ message: 'Users deleted successfully.' });
+    } catch (error) {
+        console.error('Error processing Excel file:', error);
+        res.status(500).send({ message: 'Failed to delete users.' });
+    }
+});
 
 
 app.post('/upload-images-excel', upload.single('imageExcelFile'), async (req, res) => {

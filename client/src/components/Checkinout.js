@@ -16,8 +16,10 @@ const Checkinout = () => {
         });
         if (response.data.success) {
             console.log('SMS sent successfully!');
+            enqueueSnackbar('SMS Sent Successfully!', { variant: 'success' });
         } else {
             console.error('Failed to send SMS:', response.data.message);
+            enqueueSnackbar('SMS not Sent !',{variant:'error'});
         }
     } catch (error) {
         console.error('Error sending SMS:', error);
@@ -37,7 +39,7 @@ const Checkinout = () => {
         const data = await response.json();
         sendSMS(data.parentno);
         setMessage('Student check-in successful!');
-        enqueueSnackbar('Student check-in successful!', { 
+        enqueueSnackbar('Check-in successful!', { 
           variant: 'success', 
           anchorOrigin: { vertical: 'top', horizontal: 'center' },
           autoHideDuration: 3000 

@@ -191,7 +191,7 @@ const handleImageExcelSubmit = async (e) => {
   }
 };
 
-const handleExcelSubmit = async (e) => {
+const handleAddUsers = async (e) => {
   e.preventDefault();
   const formData = new FormData();
   formData.append('excelFile', selectedFile); // Ensure this matches the server's expected field name
@@ -206,6 +206,38 @@ const handleExcelSubmit = async (e) => {
       enqueueSnackbar('Failed to upload Excel file.', { variant: 'error' });
   }
 };
+
+const handleUpdateUsers = async (e) => {
+  e.preventDefault();
+  const formData = new FormData();
+  formData.append('excelFile', selectedFile); // Ensure this matches the server's expected field name
+
+  try {
+      const response = await axios.post('http://localhost:3300/upload-update-excel', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      enqueueSnackbar(response.data.message, { variant: 'success' });
+  } catch (error) {
+      console.error('Error uploading Excel file:', error);
+      enqueueSnackbar('Failed to upload Excel file.', { variant: 'error' });
+  }
+};
+const handleDeleteUsers = async (e) => {
+  e.preventDefault();
+  const formData = new FormData();
+  formData.append('excelFile', selectedFile); // Ensure this matches the server's expected field name
+
+  try {
+      const response = await axios.post('http://localhost:3300/upload-delete-excel', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      enqueueSnackbar(response.data.message, { variant: 'success' });
+  } catch (error) {
+      console.error('Error uploading Excel file:', error);
+      enqueueSnackbar('Failed to upload Excel file.', { variant: 'error' });
+  }
+};
+
 
 const handleFileChange = (e) => {
   setSelectedFile(e.target.files[0]); // Set the selected file
@@ -607,12 +639,44 @@ const handleFileChange = (e) => {
 
             {type === 'moreUsers' && (
                 <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Add Bulk Users</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Bulk Users</h2>
 
-                    <form onSubmit={handleExcelSubmit}>
-                        <input type="file" name="excelFile" accept=".xlsx, .xls" onChange={handleFileChange} required />
-                        <button type="submit" className="bg-gray-800 text-white font-semibold py-2 px-4 rounded ml-3 hover:bg-gray-700 transition duration-200">Upload Excel</button>
-                    </form>
+            <div className="flex flex-col items-center mt-7">
+    <form className="text-center">
+        <input
+            type="file"
+            name="excelFile"
+            accept=".xlsx, .xls"
+            onChange={handleFileChange}
+            className="block mx-auto mb-6 p-2 border border-gray-300  shadow-sm"
+            required
+        />
+        <div className="flex justify-center gap-4">
+            <button
+                type="button"
+                onClick={handleAddUsers}
+                className="bg-gray-800 text-white font-semibold py-2 px-6  hover:bg-gray-600 transition duration-200"
+            >
+                Add Users
+            </button>
+            <button
+                type="button"
+                onClick={handleUpdateUsers}
+                className="bg-gray-800 text-white font-semibold py-2 px-6  hover:bg-gray-600 transition duration-200"
+            >
+                Update Users
+            </button>
+            <button
+                type="button"
+                onClick={handleDeleteUsers}
+                className="bg-red-600 text-white font-semibold py-2 px-6 hover:bg-red-500 transition duration-200"
+            >
+                Delete Users
+            </button>
+        </div>
+    </form>
+</div>
+
 
                     {/* Back button */}
                     {/* <div className="button-container">
