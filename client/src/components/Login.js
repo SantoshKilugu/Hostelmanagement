@@ -65,7 +65,7 @@ const Login = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="block w-full p-2 border border-gray-300 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-primary-600 focus:border-primary-600"
-              placeholder="enter name"
+              placeholder="Enter Name"
               required
             />
           </div>

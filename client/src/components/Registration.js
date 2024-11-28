@@ -99,11 +99,11 @@ const handleAddFingerprint = async () => {
           setUserData(data[0]);
           enqueueSnackbar("Fingerprint added successfully.", { variant: 'success' });
       } else {
-          enqueueSnackbar("No user found.", { variant: 'warning' });
+          // enqueueSnackbar("No user found.", { variant: 'warning' });
       }
   } catch (error) {
       console.error('Error running JAR:', error);
-      enqueueSnackbar('Error occurred while adding fingerprint.', { variant: 'error' });
+      // enqueueSnackbar('Error occurred while adding fingerprint.', { variant: 'error' });
   }
 };
 
