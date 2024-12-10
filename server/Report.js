@@ -215,10 +215,12 @@ export function scheduleReportTime(time) {
         reportJob.stop();
     }
 
-    // Schedule a new cron job
     reportJob = cron.schedule(time, () => {
-        console.log(`Running scheduled report at ${time}`);
-        fetchAndEmailData(null,null,null);
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+
+        console.log(`Running scheduled report at ${time} for date: ${formattedDate}`);
+        fetchAndEmailData(formattedDate, formattedDate, 'all');
     });
 
     console.log(`Report scheduled at ${time}`);

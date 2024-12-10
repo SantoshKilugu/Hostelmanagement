@@ -163,8 +163,8 @@ const Checkinout = () => {
 
 
       {/* Display error or success message */}
-      {error && <p style={{ color: 'red', marginTop: '20px' }}>{error}</p>}
-      {message && <p style={{ color: 'green', marginTop: '20px' }}>{message}</p>}
+      {error && <p style={{ color: 'white', marginTop: '20px' }}>{error}</p>}
+      {message && <p style={{ color: 'white', marginTop: '20px' }}>{message}</p>}
     </div>
   );
 };

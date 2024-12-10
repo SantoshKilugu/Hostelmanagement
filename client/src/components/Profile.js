@@ -31,7 +31,7 @@ const Profile = () => {
         try {
             const response = await fetch(`http://localhost:3300/get-student-details-profile/${rollNo}`);
             if (!response.ok) {
-                throw new Error('User not found');
+                throw new Error('User Not Found');
             }
             const data = await response.json();
             setStudentData(data);
@@ -67,8 +67,12 @@ const Profile = () => {
         const response = await axios.get(`http://localhost:3300/current-passes-filtered/${rollNo}`, {
             params: { from, to, type: filterType } 
         });
-        setPasses(response.data);
-        setCurrentPage(1);
+       if (response.data && response.data.length > 0) {
+            setPasses(response.data);
+            setCurrentPage(1);
+        } else {
+            setPasses([]); // Set passes to null if the response is null or empty
+        }
     } catch (error) {
         console.error('Error fetching pass data:', error);
     } finally {
@@ -204,32 +208,36 @@ const Profile = () => {
                
             </div>
 
-            <table className="w-full border border-gray-200">
-  <thead>
-    <tr className="bg-gray-200">
-      <th className="p-2 border-b">Date</th>
-      <th className="p-2 border-b">Out Time</th>
-      <th className="p-2 border-b">In Time</th>
-      <th className="p-2 border-b">Type</th>
-    </tr>
-  </thead>
-  <tbody>
-    {passes.map((pass, index) => {
-      const date = new Date(pass.outTime);
-      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            {/* Conditional Rendering for Data */}
+    {passes && passes.length > 0 ? (
+        <table className="w-full border border-gray-200 mt-4">
+            <thead>
+                <tr className="bg-gray-200">
+                    <th className="p-2 border-b">Date</th>
+                    <th className="p-2 border-b">Out Time</th>
+                    <th className="p-2 border-b">In Time</th>
+                    <th className="p-2 border-b">Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {passes.map((pass, index) => {
+                    const date = new Date(pass.outTime);
+                    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-      return (
-        <tr key={index} className="text-center">
-          <td className="p-2 border-b">{formattedDate}</td>
-          <td className="p-2 border-b">{pass.outTime}</td>
-          <td className="p-2 border-b">{pass.inTime}</td>
-          <td className="p-2 border-b">{pass.type}</td>
-        </tr>
-      );
-    })}
-  </tbody>
-</table>
-
+                    return (
+                        <tr key={index} className="text-center">
+                            <td className="p-2 border-b">{formattedDate}</td>
+                            <td className="p-2 border-b">{pass.outTime}</td>
+                            <td className="p-2 border-b">{pass.inTime}</td>
+                            <td className="p-2 border-b">{pass.type}</td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+    ) : (
+        <p className="text-center text-gray-500 mt-4">No data available</p>
+    )}
           
 
 </div>

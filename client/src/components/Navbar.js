@@ -53,7 +53,7 @@ const Navbar = ({ username }) => {
               </Link>
               <div className="dropdown-content">
                 <Link to="/registration/singleUser" style={{ fontSize: '13px'}}>Add User</Link>
-                <Link to="/registration/updateUser" style={{ fontSize: '13px' }}>Update User</Link>
+                <Link to="/registration/updateUser" style={{ fontSize: '13px' }}>Update/Delete</Link>
                 <Link to="/registration/addFingerprint" style={{ fontSize: '13px' }}>Add Fingerprint</Link>
                 <Link to="/registration/updateFingerprint" style={{ fontSize: '13px' }}>Update Fingerprint</Link>
                 <Link to="/registration/moreUsers" style={{ fontSize: '13px' }}>Bulk Users</Link>

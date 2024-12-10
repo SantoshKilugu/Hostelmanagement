@@ -85,7 +85,7 @@ const Home = () => {
         </div>
 
         {/* Slider controls */}
-        <button
+        {/* <button
           type="button"
           className="buttons absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
           onClick={prevSlide}
@@ -134,7 +134,7 @@ const Home = () => {
             </svg>
             <span className="sr-only">Next</span>
           </span>
-        </button>
+        </button> */}
       </div>
       {/* Footer with Marquee */}
       <footer
@@ -146,13 +146,13 @@ const Home = () => {
           color: 'white',
           padding: '10px',
           textAlign: 'center',
-          fontSize: '18px',
+          fontSize: '12px',
           zIndex: 50,
         }}
       >
         <marquee behavior="scroll" direction="left">
           Designed and Developed by  L.Chandini , M.Naveen , K.Santosh, M. Bala 
-          Krishna under the guidance of <b>Dr.K.Lakshman Rao</b> , Associate Professor , GMRIT. @2021-25
+          Krishna under the guidance of <b>Dr.K.Lakshman Rao</b> , Associate Professor , GMRIT @2021-25
         </marquee>
       </footer>
     </div>

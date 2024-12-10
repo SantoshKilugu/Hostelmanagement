@@ -85,6 +85,22 @@ app.get('/verify-rollupdate/:roll_no', async (req, res) => {
     }
   });
   
+  app.get('/delete-roll/:roll_no', async (req, res) => {
+    const rollNo = req.params.roll_no;
+    try {
+        
+        const query = `DELETE FROM users WHERE studentId = ?`;
+
+        await dbconnect.execute(query,[rollNo]);
+
+        res.status(200).send({ message: 'Users deleted successfully.' });
+    } catch (error) {
+       
+        res.status(500).send({ message: 'Failed to delete user.' });
+    }
+});
+
+
   // Endpoint to update user data
   app.put('/update-user', async (req, res) => {
     const { name, roll_no, year, branch, hostel_block_name, room_no, parent_no,gender } = req.body;
@@ -1010,6 +1026,7 @@ app.post('/upload-delete-excel', upload.single('excelFile'), async (req, res) =>
 });
 
 
+
 app.post('/upload-images-excel', upload.single('imageExcelFile'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send({ message: 'No file uploaded.' });
@@ -1310,7 +1327,7 @@ app.get('/current-gatepass-report-filtered', async (req, res) => {
 app.get('/dashboard-data', async (req, res) => {
     const { date } = req.query;  // Get date from query parameters
   const formattedDate = date || 'CURDATE()';
-
+  
     try {
       const queries = {
         totalStudents: `
@@ -1320,12 +1337,12 @@ app.get('/dashboard-data', async (req, res) => {
         totalGirls: `
           SELECT COUNT(*) AS totalGirls
           FROM users
-          WHERE gender = 'Female'
+          WHERE gender = 'Female' 
         `,
         totalBoys: `
           SELECT COUNT(*) AS totalBoys
           FROM users
-          WHERE gender = 'Male'
+          WHERE gender = 'Male' 
         `,
         totalPasses: `
           SELECT (SELECT COUNT(*) FROM Gatepass) + (SELECT COUNT(*) FROM Outpass) AS totalPasses
@@ -1706,9 +1723,9 @@ app.get('/current-passes-filtered/:rollNo', async (req, res) => {
         const [rows] = await dbconnect.execute(query, params);
         
         // If there are no records, return a message instead of an empty array
-        if (rows.length === 0) {
-            return res.status(404).send({ error: 'No passes found for the given filters.' });
-        }
+        // if (rows.length === 0) {
+        //     return res.status(404).send({ error: 'No passes found for the given filters.' });
+        // }
 
         // Return the result rows
         res.json(rows);
@@ -2303,6 +2320,20 @@ const formatDateTime = (date) => {
     const seconds = String(date.getSeconds()).padStart(2, '0');
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
+
+cron.schedule('30 15 * * *', async () => {
+    console.log('Running scheduled task at 10:00 PM...');
+    const today = moment().format('YYYY-MM-DD');
+    const filterType = 'all'; // Adjust as needed ('gatepass', 'outpass', or 'all')
+    try {
+        await fetchAndEmailData(today, today, filterType);
+        console.log('Report emailed successfully.');
+    } catch (error) {
+        console.error('Error occurred while sending the report:', error);
+    }
+});
+
+
 
 app.patch('/checkin/:roll_no', async (req, res) => {
     const { roll_no } = req.params;

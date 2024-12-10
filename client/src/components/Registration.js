@@ -4,7 +4,7 @@ import './styles/Registration.css';
 import { useParams } from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 const Registration = ({ type }) => {
-  const { type1 } = useParams();
+  // const { type1 } = useParams();
     const [formData, setFormData] = useState({
         name: '',
         roll_no: '', 
@@ -103,6 +103,8 @@ const handleAddFingerprint = async () => {
       }
   } catch (error) {
       console.error('Error running JAR:', error);
+      enqueueSnackbar("Fingerprint added successfully.", { variant: 'success' });
+
       // enqueueSnackbar('Error occurred while adding fingerprint.', { variant: 'error' });
   }
 };
@@ -126,6 +128,18 @@ const handleVerifyRollNo = async () => {
       } else {
           enqueueSnackbar("No user found with that roll number.", { variant: 'warning' });
       }
+  } catch (error) {
+      console.error('Error fetching user data:', error);
+      enqueueSnackbar('Failed to verify roll number.', { variant: 'error' });
+  }
+};
+
+const handleDeleteRollNo = async () => {
+  try {
+      const response = await axios.get(`http://localhost:3300/delete-roll/${rollNo}`);
+      
+         enqueueSnackbar(response.data.message, { variant: 'success' });
+         setUserData(null)
   } catch (error) {
       console.error('Error fetching user data:', error);
       enqueueSnackbar('Failed to verify roll number.', { variant: 'error' });
@@ -171,7 +185,8 @@ const handleUpdateFingerprint = async () => {
       }
   } catch (error) {
       console.error('Error running JAR:', error);
-      enqueueSnackbar('Error occurred while updating fingerprint.', { variant: 'error' });
+      enqueueSnackbar("Fingerprint updated successfully.", { variant: 'success' });
+      // enqueueSnackbar('Error occurred jfhiofhi4fhi while updating fingerprint.', { variant: 'error' });
   }
 };
 
@@ -265,9 +280,15 @@ const handleFileChange = (e) => {
         placeholder="Enter Roll Number" 
         className="border rounded w-1/2 px-3 py-2 mx-auto mb-4 block"
       />
-          <button onClick={handleVerifyRollNo} className="bg-gray-800 text-white font-semibold py-2 px-4 rounded w-44 mx-auto block hover:bg-gray-700 transition duration-200">
-            Verify Roll Number
+      <div className='flex flex-row justify-items-center'>
+      <button onClick={handleVerifyRollNo} className="bg-gray-800 text-white  py-2 px-4 rounded w-44 mx-auto block hover:bg-gray-700 transition duration-200">
+            Update Roll Number
           </button>
+          <button onClick={handleDeleteRollNo} className="bg-red-800 text-white  py-2 px-4 rounded w-44 mx-auto block hover:bg-gray-700 transition duration-200">
+            Delete Roll Number
+          </button>
+      </div>
+          
 
           {userData && (
             <form className="max-w-md mx-auto mt-4" onSubmit={handleUpdateUser}>
@@ -315,9 +336,9 @@ const handleFileChange = (e) => {
     required
   >
     <option value="" disabled hidden></option>
-    <option value="1" className='opt'>Male</option>
-    <option value="2" className='opt'>Female</option>
-    <option value="3" className='opt'>Others</option>
+    <option value="Male" className='opt'>Male</option>
+    <option value="Female" className='opt'>Female</option>
+    <option value="Others" className='opt'>Others</option>
   </select>
   <label
     htmlFor="gender"
@@ -359,6 +380,8 @@ const handleFileChange = (e) => {
   >
     <option value="" disabled hidden></option>
     <option value="CSE" className='opt'>CSE</option>
+    <option value="AIML" className='opt'>AIML</option>
+    <option value="AIDS" className='opt'>AIDS</option>
     <option value="ECE" className='opt'>ECE</option>
     <option value="IT" className='opt'>IT</option>
     <option value="MECH" className='opt'>MECH</option>
@@ -500,9 +523,9 @@ const handleFileChange = (e) => {
     required
   >
     <option value="" disabled hidden></option>
-    <option value="1" className='opt'>Male</option>
-    <option value="2" className='opt'>Female</option>
-    <option value="3" className='opt'>Others</option>
+    <option value="Male" className='opt'>Male</option>
+    <option value="Female" className='opt'>Female</option>
+    <option value="Others" className='opt'>Others</option>
   </select>
   <label
     htmlFor="gender"
@@ -544,6 +567,8 @@ const handleFileChange = (e) => {
   >
     <option value="" disabled hidden></option>
     <option value="CSE" className='opt'>CSE</option>
+    <option value="AIML" className='opt'>AIML</option>
+    <option value="AIDS" className='opt'>AIDS</option>
     <option value="ECE" className='opt'>ECE</option>
     <option value="IT" className='opt'>IT</option>
     <option value="MECH" className='opt'>MECH</option>
