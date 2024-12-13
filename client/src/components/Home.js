@@ -150,10 +150,10 @@ const Home = () => {
           zIndex: 50,
         }}
       >
-        <marquee behavior="scroll" direction="left">
+        {/* <marquee behavior="scroll" direction="left"> */}
           Designed and Developed by  L.Chandini , M.Naveen , K.Santosh, M. Bala 
-          Krishna under the guidance of <b>Dr.K.Lakshman Rao</b> , Associate Professor , GMRIT @2021-25
-        </marquee>
+          Krishna under the guidance of <b>Dr.K.Lakshman Rao</b> , Professor , GMRIT @2021-25
+        {/* </marquee> */}
       </footer>
     </div>
   );

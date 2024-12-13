@@ -511,6 +511,8 @@ app.post('/update-gatepass', async (req, res) => {
 
     const formattedDateTime = formatDateTime(currentDateTime);
     console.log("Formatted DateTime:", formattedDateTime);
+    console.log("current DateTime:", currentDateTime);
+
 
     try {
         // Check if there is an existing record with outTime NULL
@@ -523,16 +525,17 @@ app.post('/update-gatepass', async (req, res) => {
         const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
 
         if (rows.length === 0) {
-            res.status(400).send({ message: 'No active issue found for this roll number.' });
+            res.status(400).send({ message: 'No active issue found for this student.' });
             return;
         }
 
         const existingRecord = rows[0];
         const expectedOutTime = new Date(existingRecord.expectedOutTime);
-
+        console.log("expected DateTime:", expectedOutTime);
+ 
         // Calculate time difference in hours
         const timeDifferenceInHours = (expectedOutTime - currentDateTime) / (1000 * 60 * 60);
-
+        console.log("difference",timeDifferenceInHours);
         // If the time is over
         if (timeDifferenceInHours <= -2) {
             // Delete the student record from the database
@@ -1326,7 +1329,8 @@ app.get('/current-gatepass-report-filtered', async (req, res) => {
 
 app.get('/dashboard-data', async (req, res) => {
     const { date } = req.query;  // Get date from query parameters
-  const formattedDate = date || 'CURDATE()';
+    const formattedDt = date || null; // Handle default
+    const formattedDate = formattedDt ? `'${formattedDt}'` : 'CURDATE()';
   
     try {
       const queries = {
@@ -1462,53 +1466,53 @@ app.get('/dashboard-data', async (req, res) => {
         todaysGatepassGirlsIssued: `
           SELECT COUNT(*) AS todaysGatepassGirlsIssued FROM Gatepass g
           JOIN users u ON g.roll_no = u.studentId
-          WHERE u.gender = 'Female' AND DATE(g.issueTime) = '${formattedDate}'
+          WHERE u.gender = 'Female' AND DATE(g.issueTime) = ${formattedDate}
         `,
         todaysGatepassGirls: `
           SELECT COUNT(*) AS todaysGatepassGirls FROM Gatepass g
           JOIN users u ON g.roll_no = u.studentId
-          WHERE u.gender = 'Female' AND DATE(g.outTime) = '${formattedDate}'
+          WHERE u.gender = 'Female' AND DATE(g.outTime) = ${formattedDate}
         `,
         todaysOutpassBoys: `
         SELECT COUNT(*) AS todaysOutpassBoys FROM Outpass g
         JOIN users u ON g.roll_no = u.studentId
-        WHERE u.gender = 'Male' AND DATE(g.outTime) = '${formattedDate}'
+        WHERE u.gender = 'Male' AND DATE(g.outTime) = ${formattedDate}
       `,
       todaysGatepassBoysIssued: `
       SELECT COUNT(*) AS todaysGatepassBoysIssued FROM Gatepass g
       JOIN users u ON g.roll_no = u.studentId
-      WHERE u.gender = 'Male' AND DATE(g.issueTime) = '${formattedDate}'
+      WHERE u.gender = 'Male' AND DATE(g.issueTime) = ${formattedDate}
     `,
       todaysGatepassBoys: `
       SELECT COUNT(*) AS todaysGatepassBoys FROM Gatepass g
       JOIN users u ON g.roll_no = u.studentId
-      WHERE u.gender = 'Male' AND DATE(g.outTime) = '${formattedDate}'
+      WHERE u.gender = 'Male' AND DATE(g.outTime) = ${formattedDate}
     `,
   todaysInTimeGirls: `
          SELECT COUNT(*) AS todaysGatepassGirlsIntime FROM Gatepass g
     JOIN users u ON g.roll_no = u.studentId
-    WHERE u.gender = 'Female' AND DATE(g.inTime) = '${formattedDate}'
+    WHERE u.gender = 'Female' AND DATE(g.inTime) = ${formattedDate}
         `,
         todaysOutTimeBoys: `
         SELECT COUNT(*) AS todaysOutTimeBoys FROM (
           SELECT g.roll_no FROM Gatepass g
           JOIN users u ON g.roll_no = u.studentId
-          WHERE u.gender = 'Male' AND DATE(g.outTime) = '${formattedDate}'
+          WHERE u.gender = 'Male' AND DATE(g.outTime) = ${formattedDate}
           UNION ALL
           SELECT o.roll_no FROM Outpass o
           JOIN users u ON o.roll_no = u.studentId
-          WHERE u.gender = 'Male' AND DATE(o.outTime) = '${formattedDate}' 
+          WHERE u.gender = 'Male' AND DATE(o.outTime) = ${formattedDate} 
         ) AS combined
       `,
       todaysInTimeBoys: `
         SELECT COUNT(*) AS todaysInTimeBoys FROM (
           SELECT g.roll_no FROM Gatepass g
           JOIN users u ON g.roll_no = u.studentId
-          WHERE u.gender = 'Male' AND DATE(g.inTime) = '${formattedDate}'
+          WHERE u.gender = 'Male' AND DATE(g.inTime) = ${formattedDate}
           UNION ALL
           SELECT o.roll_no FROM Outpass o
           JOIN users u ON o.roll_no = u.studentId
-          WHERE u.gender = 'Male' AND DATE(o.inTime) = '${formattedDate}'
+          WHERE u.gender = 'Male' AND DATE(o.inTime) = ${formattedDate}
         ) AS combined
       `
       };
