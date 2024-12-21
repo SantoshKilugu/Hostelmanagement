@@ -244,7 +244,7 @@ app.get('/verify-roll-outpass/:roll_no', async (req, res) => {
 // Endpoint to run the JAR file
 app.post('/run-jar', async (req, res) => {
     // const jarPath = path.join(__dirname, '..', 'Register.jar');
-    const jarPath="Register.jar";
+    const jarPath="Enroll.jar";
     exec(`java -jar ${jarPath}`, async (error, stdout, stderr) => {
         if (error) {
             console.error(`Error: ${stderr}`);
@@ -530,8 +530,19 @@ app.post('/update-gatepass', async (req, res) => {
         }
 
         const existingRecord = rows[0];
-        const expectedOutTime = new Date(existingRecord.expectedOutTime);
-        console.log("expected DateTime:", expectedOutTime);
+        let expectedOutTime = new Date(existingRecord.expectedOutTime);
+        const parseDatabaseDateTime = (dateTimeString) => {
+            const isoFormatString = dateTimeString.replace(' ', 'T');
+            return new Date(isoFormatString);
+        };
+         expectedOutTime = parseDatabaseDateTime(existingRecord.expOutTime);
+        if (isNaN(expectedOutTime)) {
+            console.error("Error parsing expectedOutTime:", existingRecord.expOutTime);
+            res.status(500).send({ message: 'Failed to parse expectedOutTime from the database.' });
+            return;
+        }
+ 
+        console.log("Parsed expectedOutTime:", expectedOutTime);
  
         // Calculate time difference in hours
         const timeDifferenceInHours = (expectedOutTime - currentDateTime) / (1000 * 60 * 60);
@@ -639,9 +650,29 @@ app.post('/update-gatepass-issue', async (req, res) => {
     if (!roll_no || !current_time || !expected_out_time) {
         return res.status(400).json({ message: 'Invalid data provided.' });
       }
-  
-      const currentDateTime = new Date(current_time);
-      const expectedDateTime = new Date(expected_out_time);
+      console.log(expected_out_time);
+      const currentDateTime1 = new Date(current_time);
+      const expectedDateTime1 = new Date(expected_out_time);
+      console.log(current_time);
+      const formatDateTime = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    const currentDateTime = formatDateTime(currentDateTime1);
+    const expectedDateTime = formatDateTime(expectedDateTime1);
+    console.log("chantgt");
+    
+    console.log(currentDateTime);
+    console.log("chandhde");
+    console.log(expectedDateTime);
+
+    
 
    
     console.log("Formatted DateTime:",currentDateTime, expectedDateTime ); // To verify the format
@@ -654,7 +685,7 @@ app.post('/update-gatepass-issue', async (req, res) => {
             ORDER BY gatepassID DESC
             LIMIT 1
         `;
-        const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
+    const [rows] = await dbconnect.execute(checkQuery, [roll_no]);
         const outpassCheckQuery = `
         SELECT * FROM Outpass
         WHERE roll_no = ?
@@ -673,7 +704,7 @@ app.post('/update-gatepass-issue', async (req, res) => {
     } 
     else if(outpassIncomplete){
         res.status(400).send({ 
-            message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (ou tpass).' 
+            message: 'Cannot issue new gatepass. The student has not yet returned from a previous outing (out pass).' 
         });
     }
 else {
@@ -686,6 +717,7 @@ else {
 
         await dbconnect.execute(insertQuery, values);
         res.status(200).send({ message: 'Gatepass updated successfully!' });
+
     }
     } catch (error) {
         console.error('Error updating Gatepass:', error);

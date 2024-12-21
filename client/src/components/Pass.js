@@ -169,7 +169,11 @@ const Pass = () => {
                             {/* <div><strong>Gatepass Count:</strong> {userData.gatepassCount}</div> */}
                             <div><strong>Parent No:</strong> {fingerprintData.parentno}</div>
                             
-                            <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
+                            <div><strong>Date:</strong> {new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })}</div>
                             <div><strong>Time:</strong> {new Date().toLocaleTimeString()}</div>
                         </div>
                     </div>
@@ -216,7 +220,11 @@ const Pass = () => {
                             {/* <div><strong>Gatepass Count:</strong> {userData.gatepassCount}</div> */}
                             <div><strong>Parent No:</strong> {userData.parentno}</div>
                             
-                            <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
+                            <div><strong>Date:</strong> {new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })}</div>
                             <div><strong>Time:</strong> {new Date().toLocaleTimeString()}</div>
                         </div>
                     </div>
