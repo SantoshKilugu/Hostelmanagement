@@ -216,58 +216,58 @@ const generateOutpassPDF = () => {
 // Header Section
 doc.setFontSize(10);
 doc.setFont('helvetica', 'bold'); // Bold font for header
-doc.text('GMR INSTITUTE OF TECHNOLOGY', 1.5, 16); // Adjusted to start near the left
+doc.text('GMR INSTITUTE OF TECHNOLOGY', 1.5, 10); // Adjusted to start near the left
 doc.setFontSize(8.5);
-doc.text('OUTPASS FOR HOSTLERS', 14, 21);
+doc.text('OUTPASS FOR HOSTLERS', 14, 16);
 doc.setFontSize(8);
 doc.setFont('helvetica', 'normal');
-doc.text('GMR Nagar, RAJAM-532 127,  1800-129-118', 5, 26);
+doc.text('GMR Nagar, RAJAM-532 127,  1800-129-118', 5, 21);
 
 // Draw a line to divide the header from the data
-doc.line(2, 28, 75, 28); // Divider line
+doc.line(2, 23, 75, 23); // Divider line
 
 // Student Information Section
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(9.5);
-doc.text('Student Name:', 3, 35);
+doc.text('Student Name:', 3, 28);
 doc.setFont('helvetica', 'normal');
-doc.text(userData.sname?.toString() || '', 28.5, 35); // Ensure toString()
+doc.text(userData.sname?.toString() || '', 28.5, 28); // Ensure toString()
 
 doc.setFont('helvetica', 'bold');
-doc.text('Roll No:', 3, 42);
+doc.text('Roll No:', 3, 35);
 doc.setFont('helvetica', 'normal');
-doc.text(userData.studentId?.toString() || '',  28.5, 42);
+doc.text(userData.studentId?.toString() || '',  28.5, 35);
 
 // Display Branch and Year separately
 doc.setFont('helvetica', 'bold');
-doc.text('Branch:', 3, 49);
+doc.text('Branch:', 3, 42);
 doc.setFont('helvetica', 'normal');
-doc.text(userData.branch?.toString() || '',  28.5, 49);
+doc.text(userData.branch?.toString() || '',  28.5, 42);
 
 doc.setFont('helvetica', 'bold');
-doc.text('Year:', 3, 56);
+doc.text('Year:', 3, 49);
 doc.setFont('helvetica', 'normal');
-doc.text(userData.syear?.toString() || '',  28.5, 56);
+doc.text(userData.syear?.toString() || '',  28.5, 49);
 
 doc.setFont('helvetica', 'bold');
-doc.text('Block Name:', 3, 63);
+doc.text('Block Name:', 3, 56);
 doc.setFont('helvetica', 'normal');
-doc.text(userData.hostelblock?.toString() || '',  28.5, 63);
+doc.text(userData.hostelblock?.toString() || '',  28.5, 56);
 
 doc.setFont('helvetica', 'bold');
-doc.text('Room No:', 3, 70);
+doc.text('Room No:', 3, 63);
 doc.setFont('helvetica', 'normal');
-doc.text(userData.roomno?.toString() || '',  28.5, 70);
+doc.text(userData.roomno?.toString() || '',  28.5, 63);
 
 // Separate Out Time and Out Date
 doc.setFont('helvetica', 'bold');
-doc.text('Out DateTime: ', 3, 77);
+doc.text('Out DateTime: ', 3, 70);
 doc.setFont('helvetica', 'normal');
-doc.text(`${formattedDate} ${formattedTime}`?.toString() || '',  28.5, 77); // Display only time
+doc.text(`${formattedDate} ${formattedTime}`?.toString() || '',  28.5, 70); // Display only time
 
 
 doc.setFont('helvetica', 'italic');
-doc.text('Note: Return to college by 8:30pm',  10, 84); // Display only date
+doc.text('Note: Return to college by 8:30pm',  10, 77); // Display only date
 
 // Display only date
 
@@ -319,54 +319,54 @@ const generateOutpassPDF1 = () => {
     // Header Section
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold'); // Bold font for header
-    doc.text('GMR INSTITUTE OF TECHNOLOGY', 1.5, 16); // Adjusted to start near the left
+    doc.text('GMR INSTITUTE OF TECHNOLOGY', 1.5, 10); // Adjusted to start near the left
     doc.setFontSize(9);
-    doc.text('OUTPASS FOR HOSTLERS', 14, 21);
+    doc.text('OUTPASS FOR HOSTLERS', 14, 16);
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.text('GMR Nagar, RAJAM-532 127,  1800-129-118', 5, 26);
+    doc.text('GMR Nagar, RAJAM-532 127,  1800-129-118', 5, 21);
     
     // Draw a line to divide the header from the data
-    doc.line(2, 28, 75, 28); // Divider line
+    doc.line(2, 23, 75, 23); // Divider line
 
     // Student Information Section
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
-    doc.text('Student Name:', 3, 35);
+    doc.text('Student Name:', 3, 26);
     doc.setFont('helvetica', 'normal');
-    doc.text(fingerprintData.sname?.toString() || '',  28.5, 35); // Ensure toString()
+    doc.text(fingerprintData.sname?.toString() || '',  28.5, 26); // Ensure toString()
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Roll No:', 3, 42);
+    doc.text('Roll No:', 3, 35);
     doc.setFont('helvetica', 'normal');
-    doc.text(fingerprintData.studentId?.toString() || '',  28.5, 42);
+    doc.text(fingerprintData.studentId?.toString() || '',  28.5, 35);
 
     // Display Branch and Year separately
     doc.setFont('helvetica', 'bold');
-    doc.text('Branch:', 3, 49);
+    doc.text('Branch:', 3, 42);
     doc.setFont('helvetica', 'normal');
-    doc.text(fingerprintData.branch?.toString() || '',  28.5, 49);
+    doc.text(fingerprintData.branch?.toString() || '',  28.5, 42);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Year:', 3, 56);
+    doc.text('Year:', 3, 49);
     doc.setFont('helvetica', 'normal');
-    doc.text(fingerprintData.syear?.toString() || '',  28.5, 56);
+    doc.text(fingerprintData.syear?.toString() || '',  28.5, 49);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Block Name:', 3, 63);
+    doc.text('Block Name:', 3, 56);
     doc.setFont('helvetica', 'normal');
-    doc.text(fingerprintData.hostelblock?.toString() || '',  28.5, 63);
+    doc.text(fingerprintData.hostelblock?.toString() || '',  28.5, 56);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Room No:', 3, 70);
+    doc.text('Room No:', 3, 63);
     doc.setFont('helvetica', 'normal');
-    doc.text(fingerprintData.roomno?.toString() || '',  28.5, 70);
+    doc.text(fingerprintData.roomno?.toString() || '',  28.5, 63);
 
     // Separate Out Time and Out Date
     doc.setFont('helvetica', 'bold');
-    doc.text('Out DateTime:', 3, 77);
+    doc.text('Out DateTime:', 3, 70);
     doc.setFont('helvetica', 'normal');
-    doc.text(`${formattedDate} ${formattedTime}`?.toString() || '',  28.5, 77); // Display only time
+    doc.text(`${formattedDate} ${formattedTime}`?.toString() || '',  28.5, 70); // Display only time
 
     // doc.text(formattedTime?.toString() || '',  28.5, 77); // Display only time
 
@@ -377,7 +377,7 @@ const generateOutpassPDF1 = () => {
 
     // Note Section
     doc.setFont('helvetica', 'italic');
-    doc.text('Note: Return to college by 8:30 PM.', 10, 84);
+    doc.text('Note: Return to college by 8:30 PM.', 10, 77);
 
     // Implementing the PDF printing logic
     const pdfBlob = doc.output('blob');
