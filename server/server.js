@@ -245,7 +245,7 @@ app.get('/verify-roll-outpass/:roll_no', async (req, res) => {
 app.post('/run-jar', async (req, res) => {
     // const jarPath = path.join(__dirname, '..', 'Register.jar');
     const jarPath="Enroll.jar";
-    exec(`java -jar ${jarPath}`, async (error, stdout, stderr) => {
+    exec(` java -jar ${jarPath}`, async (error, stdout, stderr) => {
         if (error) {
             console.error(`Error: ${stderr}`);
             return res.status(500).send(stderr);
@@ -285,7 +285,7 @@ app.post('/run-jar', async (req, res) => {
 app.post('/run-jar-update', async (req, res) => {
     // const jarPath = path.join(__dirname, '..', 'Register.jar');
     const jarPath="Update.jar";
-    exec(`java -jar ${jarPath}`, async (error, stdout, stderr) => {
+    exec(` java -jar ${jarPath}`, async (error, stdout, stderr) => {
         if (error) {
             console.error(`Error: ${stderr}`);
             return res.status(500).send(stderr);

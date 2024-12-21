@@ -99,7 +99,7 @@ if(expectedDateTime < currentDateTime){
       console.error('Error updating gate pass:', data.message);
     } else {
       console.log('Gate pass updated successfully.');
-      setError1( `You have issued pink pass on ${currentDateTime} with expected out time ${expectedDateTime}`);
+      // setError1( `You have issued pink pass on ${currentDateTime} with expected out time ${expectedDateTime}`);
 
       // Send a WhatsApp message to the parent
       // await sendWhatsAppMessage(parentWhatsAppNumber, 'The MSG SENT successfully.');
@@ -406,7 +406,19 @@ alert("No user data to generate the Pinkpass.");
           className="border rounded w-1/3 px-3 py-2 mx-auto mb-4 block"
         />
 
-       {error && <p style={{ color: 'white', textAlign: 'center' }}>{error}</p>}
+       {error && <p style={{
+            color: 'white',
+            textAlign: 'center',
+            backgroundColor: 'red',
+            opacity:0.7,
+            fontWeight: 'bold',
+            fontSize: 'px',
+            padding: '8px',
+            borderRadius: '9px',
+            margin: '10px auto',
+            maxWidth: '400px',
+          }}
+>{error}</p>}
 
       {(!error) && fingerprintData && (
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
@@ -515,7 +527,19 @@ alert("No user data to generate the Pinkpass.");
         </button> */}
     </div>
 )}
-      {error1 && <p style={{ color: 'white', textAlign: 'center' }}>{error1}</p>}
+      {error1 && <p style={{
+            color: 'white',
+            textAlign: 'center',
+            backgroundColor: 'red',
+            opacity:0.7,
+            fontWeight: 'bold',
+            fontSize: 'px',
+            padding: '8px',
+            borderRadius: '9px',
+            margin: '10px auto',
+            maxWidth: '400px',
+          }}
+>{error1}</p>}
 
     </div>
   );

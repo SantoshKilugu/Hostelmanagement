@@ -103,7 +103,7 @@ const handleAddFingerprint = async () => {
       }
   } catch (error) {
       console.error('Error running JAR:', error);
-      enqueueSnackbar("Fingerprint added successfully.", { variant: 'success' });
+      // enqueueSnackbar("Fingerprint added successfully.", { variant: 'success' });
 
       // enqueueSnackbar('Error occurred while adding fingerprint.', { variant: 'error' });
   }
@@ -185,7 +185,7 @@ const handleUpdateFingerprint = async () => {
       }
   } catch (error) {
       console.error('Error running JAR:', error);
-      enqueueSnackbar("Fingerprint updated successfully.", { variant: 'success' });
+      // enqueueSnackbar("Fingerprint updated successfully.", { variant: 'success' });
       // enqueueSnackbar('Error occurred jfhiofhi4fhi while updating fingerprint.', { variant: 'error' });
   }
 };

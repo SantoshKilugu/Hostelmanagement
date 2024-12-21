@@ -331,39 +331,39 @@ const generateOutpassPDF1 = () => {
     // Student Information Section
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
-    doc.text('Student Name:', 4.2, 35);
+    doc.text('Student Name:', 3, 35);
     doc.setFont('helvetica', 'normal');
     doc.text(fingerprintData.sname?.toString() || '',  28.5, 35); // Ensure toString()
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Roll No:', 4.2, 42);
+    doc.text('Roll No:', 3, 42);
     doc.setFont('helvetica', 'normal');
     doc.text(fingerprintData.studentId?.toString() || '',  28.5, 42);
 
     // Display Branch and Year separately
     doc.setFont('helvetica', 'bold');
-    doc.text('Branch:', 4.2, 49);
+    doc.text('Branch:', 3, 49);
     doc.setFont('helvetica', 'normal');
     doc.text(fingerprintData.branch?.toString() || '',  28.5, 49);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Year:', 4.2, 56);
+    doc.text('Year:', 3, 56);
     doc.setFont('helvetica', 'normal');
     doc.text(fingerprintData.syear?.toString() || '',  28.5, 56);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Block Name:', 4.2, 63);
+    doc.text('Block Name:', 3, 63);
     doc.setFont('helvetica', 'normal');
     doc.text(fingerprintData.hostelblock?.toString() || '',  28.5, 63);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Room No:', 4.2, 70);
+    doc.text('Room No:', 3, 70);
     doc.setFont('helvetica', 'normal');
     doc.text(fingerprintData.roomno?.toString() || '',  28.5, 70);
 
     // Separate Out Time and Out Date
     doc.setFont('helvetica', 'bold');
-    doc.text('Out DateTime:', 4.2, 77);
+    doc.text('Out DateTime:', 3, 77);
     doc.setFont('helvetica', 'normal');
     doc.text(`${formattedDate} ${formattedTime}`?.toString() || '',  28.5, 77); // Display only time
 
@@ -419,7 +419,19 @@ const generateOutpassPDF1 = () => {
         className="border rounded w-1/3 px-3 py-2 mx-auto mb-4 block"
       />
 
-{error && <p style={{ color: 'white', textAlign: 'center' }}>{error}</p>}
+{error && <p style={{
+            color: 'white',
+            textAlign: 'center',
+            backgroundColor: 'red',
+            opacity:0.7,
+            fontWeight: 'bold',
+            fontSize: 'px',
+            padding: '8px',
+            borderRadius: '9px',
+            margin: '10px auto',
+            maxWidth: '400px',
+          }}
+>{error}</p>}
 
 {(!error) && fingerprintData && (
   <div style={{ marginTop: '20px', textAlign: 'center' }}>
@@ -536,7 +548,19 @@ const generateOutpassPDF1 = () => {
         </button> 
     </div>
 )}
-      {error1 && <p style={{ color: 'white', textAlign: 'center' }}>{error1}</p>}
+      {error1 && <p style={{
+            color: 'white',
+            textAlign: 'center',
+            backgroundColor: 'red',
+            opacity:0.7,
+            fontWeight: 'bold',
+            fontSize: 'px',
+            padding: '8px',
+            borderRadius: '9px',
+            margin: '10px auto',
+            maxWidth: '400px',
+          }}
+>{error1}</p>}
 
     </div>
   );

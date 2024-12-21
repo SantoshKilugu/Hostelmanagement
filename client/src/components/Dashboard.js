@@ -183,7 +183,7 @@ const Dashboard = () => {
           <div>
             <h4 className="text-xl font-semibold tracking-tight text-gray-700 dark:text-white">Boys</h4>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
-              Pinkpass Issued: {dashboardData.todaysGatepassGirls}
+              Pinkpass Issued: {dashboardData.todaysGatepassBoysIssued}
             </p>
             <p className="mt-2 font-semibold text-gray-500 dark:text-white" style={{ fontSize: "13px" }}>
               Pinkpass:  {dashboardData. todaysGatepassBoys}

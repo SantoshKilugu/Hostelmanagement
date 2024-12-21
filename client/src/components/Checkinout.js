@@ -37,29 +37,29 @@ const Checkinout = () => {
 
       if (response.ok) {
         const data = await response.json();
-        sendSMS(data.parentno);
+        // sendSMS(data.parentno);
         setMessage('Student check-in successful!');
-        enqueueSnackbar('Check-in successful!', { 
-          variant: 'success', 
-          anchorOrigin: { vertical: 'top', horizontal: 'center' },
-          autoHideDuration: 3000 
-        });
+        // enqueueSnackbar('Check-in successful!', { 
+        //   variant: 'success', 
+        //   anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        //   autoHideDuration: 3000 
+        // });
       } else {
         setError('Fingerprint verification failed.');
-        enqueueSnackbar('Fingerprint verification failed.', { 
-          variant: 'error', 
-          anchorOrigin: { vertical: 'top', horizontal: 'center' },
-          autoHideDuration: 3000 
-        });
+        // enqueueSnackbar('Fingerprint verification failed.', { 
+        //   variant: 'error', 
+        //   anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        //   autoHideDuration: 3000 
+        // });
       }
     } catch (err) {
       console.error('Error verifying fingerprint:', err);
       setError('Server error occurred during fingerprint verification.');
-      enqueueSnackbar('Server error occurred during fingerprint verification.', { 
-        variant: 'error', 
-        anchorOrigin: { vertical: 'top', horizontal: 'center' },
-        autoHideDuration: 3000 
-      });
+      // enqueueSnackbar('Server error occurred during fingerprint verification.', { 
+      //   variant: 'error', 
+      //   anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      //   autoHideDuration: 3000 
+      // });
     }
   };
 
@@ -68,11 +68,11 @@ const Checkinout = () => {
     setError('');
     if (rollNo.trim() === '') {
       setError('Please enter a valid Roll Number.');
-      enqueueSnackbar('Please enter a valid Roll Number.', { 
-        variant: 'warning', 
-        anchorOrigin: { vertical: 'top', horizontal: 'center' },
-        autoHideDuration: 3000 
-      });
+      // enqueueSnackbar('Please enter a valid Roll Number.', { 
+      //   variant: 'warning', 
+      //   anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      //   autoHideDuration: 3000 
+      // });
       return;
     }
 
@@ -84,37 +84,37 @@ const Checkinout = () => {
 
       if (response.ok) {
         const data = await response.json();
-        sendSMS(data.parentno);
+        // sendSMS(data.parentno);
         setMessage('Check-in successful!');
-        enqueueSnackbar('Check-in successful!', { 
-          variant: 'success', 
-          anchorOrigin: { vertical: 'top', horizontal: 'center' },
-          autoHideDuration: 3000 
-        });
+        // enqueueSnackbar('Check-in successful!', { 
+        //   variant: 'success', 
+        //   anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        //   autoHideDuration: 3000 
+        // });
         setError('');
       } else if (response.status === 404) {
         setError('No pending checkout record found for the roll number.');
-        enqueueSnackbar('No pending checkout record found for the roll number.', { 
-          variant: 'error', 
-          anchorOrigin: { vertical: 'top', horizontal: 'center' },
-          autoHideDuration: 3000 
-        });
+        // enqueueSnackbar('No pending checkout record found for the roll number.', { 
+        //   variant: 'error', 
+        //   anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        //   autoHideDuration: 3000 
+        // });
       } else {
         setError('Check-in failed.');
-        enqueueSnackbar('Check-in failed.', { 
-          variant: 'error', 
-          anchorOrigin: { vertical: 'top', horizontal: 'center' },
-          autoHideDuration: 3000 
-        });
+        // enqueueSnackbar('Check-in failed.', { 
+        //   variant: 'error', 
+        //   anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        //   autoHideDuration: 3000 
+        // });
       }
     } catch (err) {
       console.error('Error during check-in:', err);
       setError('Server error occurred during check-in.');
-      enqueueSnackbar('Server error occurred during check-in.', { 
-        variant: 'error', 
-        anchorOrigin: { vertical: 'top', horizontal: 'center' },
-        autoHideDuration: 3000 
-      });
+      // enqueueSnackbar('Server error occurred during check-in.', { 
+      //   variant: 'error', 
+      //   anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      //   autoHideDuration: 3000 
+      // });
     }
   };
 
@@ -163,8 +163,32 @@ const Checkinout = () => {
 
 
       {/* Display error or success message */}
-      {error && <p style={{ color: 'white', marginTop: '20px' }}>{error}</p>}
-      {message && <p style={{ color: 'white', marginTop: '20px' }}>{message}</p>}
+      {error && <p style={{
+            color: 'white',
+            textAlign: 'center',
+            backgroundColor: 'red',
+            opacity:0.7,
+            fontWeight: 'bold',
+            fontSize: 'px',
+            padding: '8px',
+            borderRadius: '9px',
+            margin: '10px auto',
+            maxWidth: '400px',
+          }}
+>{error}</p>}
+      {message && <p style={{
+            color: 'white',
+            textAlign: 'center',
+            backgroundColor: 'green',
+            opacity:0.7,
+            fontWeight: 'bold',
+            fontSize: 'px',
+            padding: '8px',
+            borderRadius: '9px',
+            margin: '10px auto',
+            maxWidth: '400px',
+          }}
+>{message}</p>}
     </div>
   );
 };
