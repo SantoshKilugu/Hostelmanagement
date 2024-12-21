@@ -887,7 +887,11 @@ app.post('/update-outpass-guard', async (req, res) => {
     };
     const formattedDate = formatDate(currentDateTime);
     // console.log("Formatted DateTime:", formattedDateTime);
-
+    const currentHour = currentDateTime.getHours();
+    if (currentHour < 16 || currentHour >= 18) {
+        res.status(400).send({ message: 'Outpass can only be issued between 4 PM and 6 PM.' });
+        return;
+    }
     try {
         //if already taken today...
         const checkTodayQuery = `
@@ -900,7 +904,7 @@ app.post('/update-outpass-guard', async (req, res) => {
 
         // If an outpass was already issued today, block the request
         if (todayRows.length > 0) {
-            res.status(400).send({ message: 'You have already been issued outpass today. You can only request a new one tomorrow.' });
+            res.status(400).send({ message: 'You have already been issued outpass today.' });
             return;
         }
 
